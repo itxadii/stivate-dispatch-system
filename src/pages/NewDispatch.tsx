@@ -712,16 +712,36 @@ export const NewDispatch: React.FC<NewDispatchProps> = ({
             </button>
           )}
           <div>
-            <h3 className="text-md font-bold text-slate-800 uppercase tracking-wide">
-              {editId ? `Loading Dispatch: ${dispatch.dc_no}` : 'New Dispatch Invoice'}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-md font-bold text-slate-800 uppercase tracking-wide">
+                {editId
+                  ? (dispatch.status === 'completed'
+                      ? `Edit Completed Dispatch: ${dispatch.dc_no}`
+                      : `Loading Dispatch: ${dispatch.dc_no}`)
+                  : 'New Dispatch Invoice'}
+              </h3>
+              {editId && dispatch.status === 'completed' && (
+                <span className="px-2 py-0.5 text-[10px] font-black uppercase rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Completed (Editable)
+                </span>
+              )}
+            </div>
             <p className="text-xs text-slate-400">Enter or paste Pull List Numbers or Email Subject lines</p>
           </div>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-
+          {/* Save Changes Button */}
+          <button
+            onClick={handleSave}
+            disabled={loading || !dispatch.vehicle_no || !dispatch.supplier_name}
+            className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Save changes to this dispatch (Ctrl+S)"
+          >
+            <Check size={14} className="stroke-[3]" />
+            <span>Save Changes</span>
+          </button>
 
           {/* Unified Print Set Button */}
           <button

@@ -27,7 +27,7 @@ import {
   restoreDatabase,
   getBackupList
 } from './ipc/backup';
-import { printChallan, printBarcodes, printCombinedDispatch } from './ipc/printer';
+import { printChallan, printBarcodes, printCombinedDispatch, exportVehicleUtilizationReport } from './ipc/printer';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateInfo, initUpdater } from './updater';
 
 let mainWindow: BrowserWindow | null = null;
@@ -263,6 +263,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('print:combined', (_, dispatch, items) => {
     return printCombinedDispatch(dispatch, items);
+  });
+
+  ipcMain.handle('print:exportVehicleUtilizationReport', (_, options, data) => {
+    return exportVehicleUtilizationReport(options, data);
   });
 
   // Updater IPC handlers

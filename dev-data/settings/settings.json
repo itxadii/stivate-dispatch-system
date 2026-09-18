@@ -1,6 +1,6 @@
 {
   "companyName": "I3PL INDIA PVT LTD",
-  "address": "Gat No. 1462/63, Dhoksangavi, Tal-Shirur, Dist-Pune, Maharashtra-412209\nContact Number : +918625866581\nE-mail : kitpulling.b-warehouse@i3plindia.com",
+  "address": "\nE-mail : kitpulling.b-warehouse@i3plindia.com",
   "printer": "Default",
   "barcodePrinter": "Default",
   "databaseLocation": "C:\\Projects\\clientprojects\\invoice-system\\dev-data\\database\\warehouse.db",
@@ -44,6 +44,6 @@
   "defaultVehicleNo": "MH-12-QW-1234",
   "defaultVehicleSize": "32 ft",
   "warehouseLocation": "F Warehouse",
-  "lastCloudBackupTime": 1788375195982,
-  "lastHourlyCloudBackupTime": 1788550838393
+  "lastCloudBackupTime": 1789724923610,
+  "lastHourlyCloudBackupTime": 1789724923610
 }

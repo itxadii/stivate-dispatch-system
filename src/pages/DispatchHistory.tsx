@@ -4,10 +4,12 @@ import type { Dispatch, DispatchItem, AppSettings } from '../types';
 import { SearchBox } from '../components/SearchBox';
 import { Modal } from '../components/Modal';
 import { DispatchTable } from '../components/DispatchTable';
-import { Printer, Eye, Trash2, Calendar, AlertTriangle, Download, Copy, Check, MapPin } from 'lucide-react';
+import { Printer, Eye, Trash2, Calendar, AlertTriangle, Download, Copy, Check, MapPin, Pencil } from 'lucide-react';
 import { copyDispatchPullListsToClipboard } from '../utils/clipboard';
 
-interface DispatchHistoryProps {}
+interface DispatchHistoryProps {
+  onEditDispatch?: (id: number) => void;
+}
 
 const formatDateTimeDisplay = (dateStr: string) => {
   if (!dateStr) return '';
@@ -26,8 +28,9 @@ const formatDateTimeDisplay = (dateStr: string) => {
   return dateStr;
 };
 
-export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
+export const DispatchHistory: React.FC<DispatchHistoryProps> = ({ onEditDispatch }) => {
   const [dispatches, setDispatches] = useState<Dispatch[]>([]);
+  const [recentCompletedIds, setRecentCompletedIds] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -71,6 +74,14 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
         data = await databaseService.searchDispatches(query, 'completed', limit, offset);
       } else {
         data = await databaseService.getAllDispatches('completed', limit, offset);
+      }
+
+      // Always retrieve the latest top 5 completed DC IDs so edit/delete permissions are always up-to-date
+      try {
+        const top5Completed = await databaseService.getAllDispatches('completed', 5, 0);
+        setRecentCompletedIds(top5Completed.map((d) => d.id).filter(Boolean) as number[]);
+      } catch (err) {
+        console.error('Failed to load recent completed dispatch IDs:', err);
       }
 
       if (append) {
@@ -137,7 +148,7 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
       d.date,
       d.vehicle_no,
       d.supplier_name,
-      d.total_pallets,
+      d.total_pull_lists ?? 0,
       d.total_parts,
       `"${(d.address || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
       `"${(d.particular || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
@@ -189,8 +200,9 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
 
   const handleDeleteConfirm = (id: number) => {
     const targetDisp = dispatches.find((d) => d.id === id);
-    if (targetDisp?.status === 'completed') {
-      setMessage({ text: 'Dispatched & Completed Delivery Challans cannot be deleted.', type: 'error' });
+    const isRecent = recentCompletedIds.includes(id);
+    if (targetDisp?.status === 'completed' && !isRecent) {
+      setMessage({ text: 'Older completed Delivery Challans are archived and cannot be deleted.', type: 'error' });
       setTimeout(() => setMessage(null), 3500);
       return;
     }
@@ -396,7 +408,14 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
                 {filteredDispatches.map((d) => (
                   <tr key={d.id} className="hover:bg-slate-50/50 transition-colors duration-100">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono font-bold text-slate-800">
-                      {d.dc_no}
+                      <div className="flex items-center gap-1.5">
+                        <span>{d.dc_no}</span>
+                        {d.id && recentCompletedIds.includes(d.id) && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-sans font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded tracking-tight" title="Editable (One of the last 5 completed DCs)">
+                            Editable
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-700 max-w-[220px]">
                       <div
@@ -425,7 +444,7 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
                       {d.supplier_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-800 text-right font-medium">
-                      {d.total_pallets}
+                      {d.total_pull_lists ?? 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-800 text-right font-bold">
                       {d.total_parts}
@@ -470,11 +489,21 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
                         >
                           <Printer size={15} />
                         </button>
-                        {/* Delete Action - Only allowed for non-completed drafts */}
-                        {d.status !== 'completed' && (
+                        {/* Edit Action - Allowed for last 5 completed DCs or non-completed */}
+                        {((d.status !== 'completed') || (d.id && recentCompletedIds.includes(d.id))) && (
+                          <button
+                            onClick={() => d.id && onEditDispatch?.(d.id)}
+                            title={d.status === 'completed' ? "Edit completed DC (Allowed for last 5 completed DCs)" : "Edit dispatch"}
+                            className="p-1 rounded text-amber-600 hover:bg-amber-50 hover:text-amber-800 transition-colors duration-150 cursor-pointer"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                        )}
+                        {/* Delete Action - Allowed for last 5 completed DCs or non-completed */}
+                        {((d.status !== 'completed') || (d.id && recentCompletedIds.includes(d.id))) && (
                           <button
                             onClick={() => d.id && handleDeleteConfirm(d.id)}
-                            title="Delete dispatch"
+                            title={d.status === 'completed' ? "Delete completed DC (Allowed for last 5 completed DCs)" : "Delete dispatch"}
                             className="p-1 rounded text-rose-600 hover:bg-rose-50 hover:text-rose-800 transition-colors duration-150 cursor-pointer"
                           >
                             <Trash2 size={15} />
@@ -535,6 +564,12 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
                 <span className="text-slate-400 font-bold uppercase block mb-0.5">Pallets Count</span>
                 <span className="font-semibold text-slate-700 font-mono text-xs">{selectedDispatch.total_pallets}</span>
               </div>
+              <div>
+                <span className="text-slate-400 font-bold uppercase block mb-0.5">Total Pull Lists</span>
+                <span className="font-semibold text-slate-700 font-mono text-xs">
+                  {selectedDispatch.items?.length ?? selectedDispatch.total_pull_lists ?? 0}
+                </span>
+              </div>
               <div className="col-span-2">
                 <span className="text-slate-400 font-bold uppercase block mb-0.5">Destination Address</span>
                 <span className="font-semibold text-slate-700">{selectedDispatch.address}</span>
@@ -590,6 +625,20 @@ export const DispatchHistory: React.FC<DispatchHistoryProps> = () => {
 
             {/* Modal Controls */}
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              {selectedDispatch.id && (selectedDispatch.status !== 'completed' || recentCompletedIds.includes(selectedDispatch.id)) && (
+                <button
+                  onClick={() => {
+                    const id = selectedDispatch.id;
+                    setDetailModalOpen(false);
+                    if (id) onEditDispatch?.(id);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                  title="Edit this dispatch in editor"
+                >
+                  <Pencil size={14} />
+                  <span>Edit Dispatch</span>
+                </button>
+              )}
               <button
                 onClick={() => handleReprintBarcodes(selectedDispatch.items)}
                 className="flex items-center gap-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer transition-colors"

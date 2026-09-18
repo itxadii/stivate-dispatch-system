@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     printChallan: (dispatch: any, items: any[]) => ipcRenderer.invoke('print:challan', dispatch, items),
     printBarcodes: (items: any[], dispatch?: any) => ipcRenderer.invoke('print:barcodes', items, dispatch),
     printCombinedDispatch: (dispatch: any, items: any[]) => ipcRenderer.invoke('print:combined', dispatch, items),
+    exportVehicleUtilizationReport: (options: any, data: any) => ipcRenderer.invoke('print:exportVehicleUtilizationReport', options, data),
   },
   clipboard: {
     write: (data: { text: string; html?: string }) => ipcRenderer.invoke('clipboard:write', data),

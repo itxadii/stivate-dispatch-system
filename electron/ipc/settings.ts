@@ -41,11 +41,11 @@ export interface AppSettings {
  * C:\ProgramData\Invoice System\
  */
 export const getBaseDirectory = (): string => {
-  const isDev = !app.isPackaged;
+  const isDev = !app?.isPackaged;
 
   return isDev
     ? path.join(process.cwd(), 'dev-data')
-    : app.getPath('userData');
+    : (app?.getPath ? app.getPath('userData') : path.join(process.cwd(), 'dev-data'));
 };
 
 /**
@@ -163,10 +163,17 @@ export const loadSettings = (): AppSettings => {
     ensureDirectories();
 
     const settingsFile = getSettingsPath();
+    let fileToRead = settingsFile;
+    if (!fs.existsSync(settingsFile)) {
+      const legacyPath = path.join(getBaseDirectory(), 'settings.json');
+      if (fs.existsSync(legacyPath)) {
+        fileToRead = legacyPath;
+      }
+    }
 
-    if (fs.existsSync(settingsFile)) {
+    if (fs.existsSync(fileToRead)) {
       const saved = JSON.parse(
-        fs.readFileSync(settingsFile, 'utf8')
+        fs.readFileSync(fileToRead, 'utf8')
       );
 
       return {
@@ -202,6 +209,16 @@ export const saveSettings = (
       JSON.stringify(secureSettings, null, 2),
       'utf8'
     );
+
+    // Also keep legacy root settings.json updated if present
+    const legacyPath = path.join(baseDir, 'settings.json');
+    if (fs.existsSync(legacyPath)) {
+      try {
+        fs.writeFileSync(legacyPath, JSON.stringify(secureSettings, null, 2), 'utf8');
+      } catch (legacyErr) {
+        console.warn('Failed to sync legacy settings.json:', legacyErr);
+      }
+    }
 
     return true;
   } catch (err) {

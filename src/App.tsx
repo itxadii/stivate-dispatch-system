@@ -211,7 +211,7 @@ function App() {
             />
           )}
           {activeTab === 'completed' && (
-            <DispatchHistory />
+            <DispatchHistory onEditDispatch={handleEditDispatch} />
           )}
           {activeTab === 'reports' && (
             <Reports />

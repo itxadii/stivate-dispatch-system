@@ -254,7 +254,19 @@ export const saveDispatch = (dispatch: any, items: any[]) => {
     }
 
     if (dispatchId) {
-      const existing = db.prepare('SELECT status, date FROM dispatches WHERE id = ?').get(dispatchId) as { status?: string; date?: string } | undefined;
+      const existing = db.prepare('SELECT status, date, dc_no FROM dispatches WHERE id = ?').get(dispatchId) as { status?: string; date?: string; dc_no?: string } | undefined;
+      
+      // If dispatch is already completed, ensure it is one of the last 5 completed DCs before allowing edits
+      if (existing && existing.status === 'completed') {
+        const recentCompleted = db.prepare("SELECT id FROM dispatches WHERE status = 'completed' ORDER BY date DESC, id DESC LIMIT 5").all() as { id: number }[];
+        const isAllowed = recentCompleted.some(r => r.id === dispatchId);
+        if (!isAllowed) {
+          console.warn(`[Security] Blocked attempt to edit older completed dispatch ${existing.dc_no} (ID: ${dispatchId})`);
+          logAudit('EDIT_DISPATCH_BLOCKED', `Blocked attempt to edit older completed dispatch ${existing.dc_no} (ID: ${dispatchId})`);
+          throw new Error(`Archived dispatch ${existing.dc_no} is permanently locked for compliance and cannot be modified.`);
+        }
+      }
+
       let dispatchDate = dispatch.date;
       if (dispatch.status === 'completed' && existing && existing.status !== 'completed') {
         const now = new Date();
@@ -376,9 +388,14 @@ export const deleteDispatch = (id: number) => {
   
   if (dispatch) {
     if (dispatch.status === 'completed') {
-      console.warn(`[Security] Blocked attempt to delete completed dispatch ${dispatch.dc_no} (ID: ${id})`);
-      logAudit('DELETE_DISPATCH_BLOCKED', `Blocked attempt to delete completed dispatch ${dispatch.dc_no} (ID: ${id})`);
-      return false;
+      // Allow deletion only if this dispatch is among the 5 most recent completed DCs
+      const recentCompleted = db.prepare("SELECT id FROM dispatches WHERE status = 'completed' ORDER BY date DESC, id DESC LIMIT 5").all() as { id: number }[];
+      const isAllowed = recentCompleted.some(r => r.id === id);
+      if (!isAllowed) {
+        console.warn(`[Security] Blocked attempt to delete older completed dispatch ${dispatch.dc_no} (ID: ${id})`);
+        logAudit('DELETE_DISPATCH_BLOCKED', `Blocked attempt to delete older completed dispatch ${dispatch.dc_no} (ID: ${id})`);
+        return false;
+      }
     }
     const runDelete = db.transaction(() => {
       db.prepare('DELETE FROM dispatch_items WHERE dispatch_id = ?').run(id);
@@ -393,7 +410,12 @@ export const deleteDispatch = (id: number) => {
 
 export const getDispatch = (id: number) => {
   const db = getDb();
-  const dispatch = db.prepare('SELECT * FROM dispatches WHERE id = ?').get(id);
+  const dispatch = db.prepare(`
+    SELECT d.*, 
+           (SELECT COUNT(*) FROM dispatch_items di WHERE di.dispatch_id = d.id) AS total_pull_lists
+    FROM dispatches d 
+    WHERE d.id = ?
+  `).get(id);
   if (!dispatch) return null;
 
   const items = db.prepare('SELECT * FROM dispatch_items WHERE dispatch_id = ?').all(id);
@@ -402,20 +424,24 @@ export const getDispatch = (id: number) => {
 
 export const getAllDispatches = (status?: string | string[], limit?: number, offset?: number) => {
   const db = getDb();
-  let query = 'SELECT * FROM dispatches';
+  let query = `
+    SELECT d.*, 
+           (SELECT COUNT(*) FROM dispatch_items di WHERE di.dispatch_id = d.id) AS total_pull_lists
+    FROM dispatches d
+  `;
   const params: any[] = [];
 
   if (status) {
     if (Array.isArray(status)) {
-      query += ` WHERE status IN (${status.map(() => '?').join(',')})`;
+      query += ` WHERE d.status IN (${status.map(() => '?').join(',')})`;
       params.push(...status);
     } else {
-      query += ' WHERE status = ?';
+      query += ' WHERE d.status = ?';
       params.push(status);
     }
   }
 
-  query += ' ORDER BY date DESC, id DESC';
+  query += ' ORDER BY d.date DESC, d.id DESC';
 
   if (limit !== undefined && offset !== undefined) {
     query += ' LIMIT ? OFFSET ?';
@@ -433,7 +459,8 @@ export const searchDispatches = (query: string, status?: string | string[], limi
 
   const wild = `%${query}%`;
   let sql = `
-    SELECT DISTINCT d.* 
+    SELECT DISTINCT d.*,
+           (SELECT COUNT(*) FROM dispatch_items di WHERE di.dispatch_id = d.id) AS total_pull_lists
     FROM dispatches d
     LEFT JOIN dispatch_items di ON d.id = di.dispatch_id
     WHERE (d.dc_no LIKE ? 
@@ -529,12 +556,18 @@ export const getDashboardStats = () => {
 
   // Supervisor share (Top 5)
   const supervisorShare = db.prepare(`
-    SELECT supplier_name as name, COUNT(*) as count 
+    SELECT 
+      CASE 
+        WHEN supplier_name IS NULL OR TRIM(supplier_name) = '' THEN 'UNASSIGNED'
+        ELSE UPPER(TRIM(supplier_name))
+      END as name,
+      COUNT(*) as count,
+      SUM(COALESCE(total_pallets, 1)) as pallets
     FROM dispatches 
-    GROUP BY supplier_name 
+    GROUP BY name
     ORDER BY count DESC 
     LIMIT 5
-  `).all() as { name: string; count: number }[];
+  `).all() as { name: string; count: number; pallets?: number }[];
 
   return {
     todayDispatches: todayDispatches?.count || 0,

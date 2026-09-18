@@ -30,6 +30,7 @@ interface ElectronAPI {
     printChallan: (dispatch: any, items: any[]) => Promise<void>;
     printBarcodes: (items: any[], dispatch?: any) => Promise<void>;
     printCombinedDispatch: (dispatch: any, items: any[]) => Promise<void>;
+    exportVehicleUtilizationReport: (options: any, data: any) => Promise<{ success: boolean; filePath: string; base64?: string }>;
   };
   clipboard?: {
     write: (data: { text: string; html?: string }) => Promise<boolean>;

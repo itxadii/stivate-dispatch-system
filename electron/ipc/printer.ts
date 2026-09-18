@@ -109,10 +109,11 @@ const drawBarcode = (
 
 // Helper to look up and load logo image safely
 const getLogoImage = async (pdfDoc: PDFDocument) => {
+  const appPath = app?.getAppPath ? app.getAppPath() : process.cwd();
   const logoPaths = [
-    path.join(app.getAppPath(), 'public', 'logo.png'),
-    path.join(app.getAppPath(), 'dist', 'logo.png'),
-    path.join(app.getAppPath(), 'logo.png'),
+    path.join(appPath, 'public', 'logo.png'),
+    path.join(appPath, 'dist', 'logo.png'),
+    path.join(appPath, 'logo.png'),
     path.join(__dirname, '../public/logo.png'),
     path.join(__dirname, '../dist/logo.png'),
     path.join(__dirname, 'logo.png'),
@@ -128,6 +129,25 @@ const getLogoImage = async (pdfDoc: PDFDocument) => {
     }
   }
   return null;
+};
+
+// Helper to safely strip unsupported unicode characters for WinAnsi encoding
+const sanitizePdfText = (text: any, preserveNewlines: boolean = false): string => {
+  if (text === null || text === undefined) return '';
+  let str = String(text);
+  if (preserveNewlines) {
+    str = str.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    str = str.replace(/[\t\f\v]+/g, ' ');
+  } else {
+    str = str.replace(/[\r\n\t\f\v]+/g, ' ');
+  }
+  str = str.replace(/[—–]/g, '-');
+  str = str.replace(/[•·]/g, '|');
+  str = str.replace(/[""]/g, '"');
+  str = str.replace(/['']/g, "'");
+  str = str.replace(/…/g, '...');
+  str = str.replace(/[^\x20-\x7E\n]/g, ' ');
+  return str.trim();
 };
 
 const wrapText = (text: string, maxChars: number): string[] => {
@@ -226,11 +246,46 @@ const buildChallanPage = (pdfDoc: PDFDocument, dispatch: any, font: any, fontBol
     textX = margin + 90;
   }
 
-  page.drawText('I3PL INDIA PVT LTD', { x: textX, y: yCursor - 20, size: 14, font: fontBold, color: rgb(0.1, 0.1, 0.1) });
-  page.drawText('Gat No. 1462/63, Dhoksangavi,', { x: textX, y: yCursor - 32, size: 9, font, color: rgb(0.3, 0.3, 0.3) });
-  page.drawText('Tal-Shirur, Dist-Pune, Maharashtra-412209', { x: textX, y: yCursor - 42, size: 9, font, color: rgb(0.3, 0.3, 0.3) });
-  page.drawText('Contact Number : +918625866581', { x: textX, y: yCursor - 52, size: 9, font, color: rgb(0.3, 0.3, 0.3) });
-  page.drawText('E-mail : kitpulling.b-warehouse@i3plindia.com', { x: textX, y: yCursor - 62, size: 9, font, color: rgb(0.3, 0.3, 0.3) });
+  const actualSettings = settings || loadSettings();
+  const rawCompanyName = (actualSettings?.companyName || 'I3PL INDIA PVT LTD').trim();
+  const rawCompanyAddress = (actualSettings?.address || '').trim();
+
+  const companyName = sanitizePdfText(rawCompanyName);
+  page.drawText(companyName, {
+    x: textX,
+    y: yCursor - 19,
+    size: companyName.length > 30 ? 11.5 : 13.5,
+    font: fontBold,
+    color: rgb(0.1, 0.1, 0.1),
+  });
+
+  const maxAddrChars = logo ? 52 : 68;
+  const companyAddrLines = rawCompanyAddress
+    ? rawCompanyAddress
+        .split('\n')
+        .map((line: string) => line.trim())
+        .filter(Boolean)
+        .flatMap((line: string) => wrapText(sanitizePdfText(line), maxAddrChars))
+    : [];
+
+  if (companyAddrLines.length > 0) {
+    const linesToDraw = companyAddrLines.slice(0, 5);
+    const lineCount = linesToDraw.length;
+    const fontSize = lineCount <= 2 ? 9 : lineCount <= 3 ? 8.5 : lineCount === 4 ? 8 : 7.5;
+    const lineHeight = lineCount <= 2 ? 12 : lineCount <= 3 ? 11 : lineCount === 4 ? 10 : 9;
+    let compAddrY = yCursor - (lineCount <= 2 ? 33 : 30);
+
+    for (const line of linesToDraw) {
+      page.drawText(line, {
+        x: textX,
+        y: compAddrY,
+        size: fontSize,
+        font,
+        color: rgb(0.25, 0.25, 0.25),
+      });
+      compAddrY -= lineHeight;
+    }
+  }
 
   const rightX = margin + 420;
   page.drawLine({
@@ -747,3 +802,679 @@ export const printCombinedDispatch = async (dispatch: any, items: any[]): Promis
     throw err;
   }
 };
+
+export const exportVehicleUtilizationReport = async (
+  options: {
+    dateRangeLabel: string;
+    startDate?: string;
+    endDate?: string;
+    dcFilter: string;
+    vehicleFilter: string;
+    reportType: 'summary' | 'detailed' | 'both';
+    includeCompleteFleet: boolean;
+  },
+  data: {
+    summary: {
+      totalVehicles: number;
+      totalDispatches: number;
+      totalLoadedPallets: number;
+      totalAvailableCapacity: number;
+      fleetUtilizationPct: number;
+    };
+    vehicleTypeSummary: Array<{
+      vehicleType: string;
+      totalVehicles: number;
+      dispatches: number;
+      loadedPallets: number;
+      availableCapacity: number;
+      utilizationPct: number;
+    }>;
+    dcSummary?: Array<{
+      dcNo: string;
+      destination?: string;
+      vehiclesCount: number;
+      dispatchesCount: number;
+      loadedPallets: number;
+      availableCapacity: number;
+      utilizationPct: number;
+    }>;
+    vehicles: Array<{
+      vehicleNo: string;
+      vehicleType: string;
+      dispatchesCount: number;
+      loadedPallets: number;
+      availableCapacity: number;
+      utilizationPct: number;
+    }>;
+    dispatches: Array<{
+      dcNo: string;
+      date: string;
+      vehicleNo: string;
+      vehicleSize: string;
+      supplierName: string;
+      loadedPallets: number;
+      dispatchCapacity: number;
+      loadRatioPct: number;
+      status: string;
+    }>;
+  }
+): Promise<{ success: boolean; filePath: string; base64: string }> => {
+  try {
+    const cleanDateRangeLabel = sanitizePdfText(options.dateRangeLabel);
+    const cleanDcFilter = sanitizePdfText(options.dcFilter);
+    const cleanVehicleFilter = sanitizePdfText(options.vehicleFilter);
+
+    const settings = loadSettings();
+    const pdfDoc = await PDFDocument.create();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const logo = await getLogoImage(pdfDoc);
+
+    const pageWidth = 841.89; // A4 landscape
+    const pageHeight = 595.276;
+    const margin = 36;
+    const printableWidth = pageWidth - margin * 2;
+    const bottomMargin = 45;
+
+    let currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+    let yCursor = pageHeight - margin;
+
+    // Helper to add a new page with running subheader
+    const startNewPage = (currentTableTitle?: string) => {
+      currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+      yCursor = pageHeight - margin;
+
+      // Running top mini-header
+      currentPage.drawText('I3PL INDIA PVT LTD - VEHICLE UTILIZATION REPORT', {
+        x: margin,
+        y: yCursor - 10,
+        size: 9,
+        font: fontBold,
+        color: rgb(0.2, 0.25, 0.35)
+      });
+
+      const subtext = sanitizePdfText(`Period: ${cleanDateRangeLabel} | DC: ${cleanDcFilter} | Vehicle: ${cleanVehicleFilter}`);
+      currentPage.drawText(subtext, {
+        x: margin + 300,
+        y: yCursor - 10,
+        size: 8,
+        font,
+        color: rgb(0.4, 0.45, 0.5)
+      });
+
+      currentPage.drawLine({
+        start: { x: margin, y: yCursor - 16 },
+        end: { x: margin + printableWidth, y: yCursor - 16 },
+        thickness: 0.5,
+        color: rgb(0.8, 0.85, 0.9)
+      });
+
+      yCursor -= 30;
+
+      if (currentTableTitle) {
+        currentPage.drawText(`${sanitizePdfText(currentTableTitle)} (Continued)`, {
+          x: margin,
+          y: yCursor,
+          size: 9,
+          font: fontBold,
+          color: rgb(0.15, 0.2, 0.3)
+        });
+        yCursor -= 14;
+      }
+    };
+
+    const ensureSpace = (neededHeight: number, currentTableTitle?: string) => {
+      if (yCursor - neededHeight < bottomMargin) {
+        startNewPage(currentTableTitle);
+      }
+    };
+
+    // ==========================================
+    // PAGE 1: HEADER & SUMMARY
+    // ==========================================
+
+    // Top Header Banner Box
+    const headerBoxHeight = 65;
+    currentPage.drawRectangle({
+      x: margin,
+      y: yCursor - headerBoxHeight,
+      width: printableWidth,
+      height: headerBoxHeight,
+      color: rgb(0.97, 0.98, 0.99),
+      borderColor: rgb(0.82, 0.86, 0.9),
+      borderWidth: 1
+    });
+
+    let headerTextX = margin + 12;
+    if (logo) {
+      try {
+        currentPage.drawImage(logo, {
+          x: margin + 12,
+          y: yCursor - 52,
+          width: 75,
+          height: 38
+        });
+        headerTextX = margin + 98;
+      } catch (err) {
+        console.error('Failed to draw logo on utilization report:', err);
+      }
+    }
+
+    currentPage.drawText('I3PL INDIA PVT LTD', {
+      x: headerTextX,
+      y: yCursor - 18,
+      size: 14,
+      font: fontBold,
+      color: rgb(0.08, 0.15, 0.28)
+    });
+
+    currentPage.drawText('VEHICLE UTILIZATION REPORT', {
+      x: headerTextX,
+      y: yCursor - 33,
+      size: 11,
+      font: fontBold,
+      color: rgb(0.1, 0.45, 0.75)
+    });
+
+    currentPage.drawText('DC / Dispatch Management System | Fleet Pallet Load & Capacity Analysis', {
+      x: headerTextX,
+      y: yCursor - 47,
+      size: 8,
+      font,
+      color: rgb(0.4, 0.45, 0.5)
+    });
+
+    // Right Metadata Grid in Header Box
+    const metaX = margin + printableWidth - 270;
+    currentPage.drawLine({
+      start: { x: metaX - 12, y: yCursor },
+      end: { x: metaX - 12, y: yCursor - headerBoxHeight },
+      thickness: 1,
+      color: rgb(0.85, 0.88, 0.92)
+    });
+
+    const nowStr = sanitizePdfText(new Date().toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    }));
+
+    currentPage.drawText('Report Generated:', { x: metaX, y: yCursor - 16, size: 7.5, font: fontBold, color: rgb(0.4, 0.45, 0.5) });
+    currentPage.drawText(nowStr, { x: metaX + 85, y: yCursor - 16, size: 7.5, font, color: rgb(0.1, 0.1, 0.1) });
+
+    currentPage.drawText('Selected Period:', { x: metaX, y: yCursor - 28, size: 7.5, font: fontBold, color: rgb(0.4, 0.45, 0.5) });
+    currentPage.drawText(cleanDateRangeLabel, { x: metaX + 85, y: yCursor - 28, size: 7.5, font: fontBold, color: rgb(0.08, 0.15, 0.28) });
+
+    currentPage.drawText('DC Filter:', { x: metaX, y: yCursor - 40, size: 7.5, font: fontBold, color: rgb(0.4, 0.45, 0.5) });
+    currentPage.drawText(cleanDcFilter, { x: metaX + 85, y: yCursor - 40, size: 7.5, font, color: rgb(0.1, 0.1, 0.1) });
+
+    currentPage.drawText('Vehicle Filter:', { x: metaX, y: yCursor - 52, size: 7.5, font: fontBold, color: rgb(0.4, 0.45, 0.5) });
+    currentPage.drawText(cleanVehicleFilter, { x: metaX + 85, y: yCursor - 52, size: 7.5, font, color: rgb(0.1, 0.1, 0.1) });
+
+    yCursor -= headerBoxHeight + 14;
+
+    // KPI Summary Stat Tiles (5 Cards side-by-side)
+    const kpiCardWidth = (printableWidth - 4 * 10) / 5;
+    const kpiCardHeight = 44;
+    const kpis = [
+      {
+        title: 'TOTAL VEHICLES',
+        val: data.summary.totalVehicles.toLocaleString(),
+        sub: options.includeCompleteFleet ? 'Registered Fleet' : 'Active in Period',
+        color: rgb(0.1, 0.15, 0.25)
+      },
+      {
+        title: 'TOTAL DISPATCHES',
+        val: data.summary.totalDispatches.toLocaleString(),
+        sub: 'Included Records',
+        color: rgb(0.1, 0.45, 0.75)
+      },
+      {
+        title: 'LOADED PALLETS',
+        val: data.summary.totalLoadedPallets.toLocaleString(),
+        sub: 'Total Cargo Pallets',
+        color: rgb(0.15, 0.55, 0.35)
+      },
+      {
+        title: 'AVAILABLE CAPACITY',
+        val: `${data.summary.totalAvailableCapacity.toLocaleString()} P`,
+        sub: 'Summed DC Capacity',
+        color: rgb(0.85, 0.45, 0.05)
+      },
+      {
+        title: 'FLEET UTILIZATION',
+        val: `${data.summary.fleetUtilizationPct.toFixed(2)}%`,
+        sub: 'Overall Capacity Load',
+        color: data.summary.fleetUtilizationPct >= 80 ? rgb(0.85, 0.45, 0.05) : rgb(0.1, 0.6, 0.35),
+        highlight: true
+      }
+    ];
+
+    kpis.forEach((kpi, idx) => {
+      const cardX = margin + idx * (kpiCardWidth + 10);
+      currentPage.drawRectangle({
+        x: cardX,
+        y: yCursor - kpiCardHeight,
+        width: kpiCardWidth,
+        height: kpiCardHeight,
+        color: kpi.highlight ? rgb(0.95, 0.98, 0.95) : rgb(0.98, 0.98, 0.99),
+        borderColor: kpi.highlight ? rgb(0.5, 0.8, 0.6) : rgb(0.85, 0.88, 0.92),
+        borderWidth: 1
+      });
+
+      currentPage.drawText(sanitizePdfText(kpi.title), {
+        x: cardX + 8,
+        y: yCursor - 12,
+        size: 6.5,
+        font: fontBold,
+        color: rgb(0.45, 0.5, 0.55)
+      });
+
+      currentPage.drawText(sanitizePdfText(kpi.val), {
+        x: cardX + 8,
+        y: yCursor - 28,
+        size: 12,
+        font: fontBold,
+        color: kpi.color
+      });
+
+      currentPage.drawText(sanitizePdfText(kpi.sub), {
+        x: cardX + 8,
+        y: yCursor - 38,
+        size: 6.5,
+        font,
+        color: rgb(0.5, 0.55, 0.6)
+      });
+    });
+
+    yCursor -= kpiCardHeight + 16;
+
+    // Helper to draw a generic clean table
+    const drawTable = (
+      tableTitle: string,
+      columns: Array<{ header: string; width: number; align?: 'left' | 'right' | 'center' }>,
+      rows: Array<Array<{ text: string; isBold?: boolean; color?: any }>>,
+      summaryRow?: Array<{ text: string; isBold?: boolean; color?: any }>
+    ) => {
+      ensureSpace(40, tableTitle);
+
+      // Table Title
+      const cleanTitle = sanitizePdfText(tableTitle);
+      currentPage.drawText(cleanTitle, {
+        x: margin,
+        y: yCursor,
+        size: 10,
+        font: fontBold,
+        color: rgb(0.12, 0.18, 0.28)
+      });
+      yCursor -= 14;
+
+      const rowHeight = 17;
+      const headerHeight = 18;
+
+      const drawTableHeader = () => {
+        currentPage.drawRectangle({
+          x: margin,
+          y: yCursor - headerHeight,
+          width: printableWidth,
+          height: headerHeight,
+          color: rgb(0.92, 0.94, 0.96),
+          borderColor: rgb(0.8, 0.84, 0.88),
+          borderWidth: 0.5
+        });
+
+        let currentColX = margin;
+        columns.forEach((col) => {
+          let textX = currentColX + 6;
+          const cleanHeader = sanitizePdfText(col.header);
+          const textWidth = fontBold.widthOfTextAtSize(cleanHeader, 7.5);
+          if (col.align === 'right') {
+            textX = currentColX + col.width - textWidth - 6;
+          } else if (col.align === 'center') {
+            textX = currentColX + (col.width - textWidth) / 2;
+          }
+
+          currentPage.drawText(cleanHeader, {
+            x: textX,
+            y: yCursor - 12,
+            size: 7.5,
+            font: fontBold,
+            color: rgb(0.25, 0.3, 0.38)
+          });
+          currentColX += col.width;
+        });
+        yCursor -= headerHeight;
+      };
+
+      drawTableHeader();
+
+      if (rows.length === 0) {
+        ensureSpace(rowHeight);
+        currentPage.drawRectangle({
+          x: margin,
+          y: yCursor - rowHeight,
+          width: printableWidth,
+          height: rowHeight,
+          color: rgb(1, 1, 1),
+          borderColor: rgb(0.88, 0.9, 0.93),
+          borderWidth: 0.5
+        });
+        currentPage.drawText('No records matching the selected filters.', {
+          x: margin + 12,
+          y: yCursor - 12,
+          size: 8,
+          font,
+          color: rgb(0.5, 0.55, 0.6)
+        });
+        yCursor -= rowHeight + 12;
+        return;
+      }
+
+      rows.forEach((row, rowIdx) => {
+        if (yCursor - rowHeight < bottomMargin) {
+          startNewPage(tableTitle);
+          drawTableHeader();
+        }
+
+        const isEven = rowIdx % 2 === 0;
+        currentPage.drawRectangle({
+          x: margin,
+          y: yCursor - rowHeight,
+          width: printableWidth,
+          height: rowHeight,
+          color: isEven ? rgb(1, 1, 1) : rgb(0.98, 0.985, 0.995),
+          borderColor: rgb(0.88, 0.9, 0.93),
+          borderWidth: 0.5
+        });
+
+        let currentColX = margin;
+        row.forEach((cell, cellIdx) => {
+          const col = columns[cellIdx];
+          const cellFont = cell.isBold ? fontBold : font;
+          const cellColor = cell.color || rgb(0.15, 0.2, 0.25);
+          const rawText = sanitizePdfText(cell.text || '-');
+
+          // Truncate text if wider than column
+          let displayText = rawText;
+          const maxTextWidth = col.width - 12;
+          if (cellFont.widthOfTextAtSize(displayText, 7.5) > maxTextWidth && maxTextWidth > 20) {
+            while (displayText.length > 3 && cellFont.widthOfTextAtSize(displayText + '...', 7.5) > maxTextWidth) {
+              displayText = displayText.slice(0, -1);
+            }
+            displayText += '...';
+          }
+
+          const actualWidth = cellFont.widthOfTextAtSize(displayText, 7.5);
+          let textX = currentColX + 6;
+          if (col.align === 'right') {
+            textX = currentColX + col.width - actualWidth - 6;
+          } else if (col.align === 'center') {
+            textX = currentColX + (col.width - actualWidth) / 2;
+          }
+
+          currentPage.drawText(displayText, {
+            x: textX,
+            y: yCursor - 12,
+            size: 7.5,
+            font: cellFont,
+            color: cellColor
+          });
+
+          currentColX += col.width;
+        });
+
+        yCursor -= rowHeight;
+      });
+
+      // Summary Row (if provided)
+      if (summaryRow) {
+        if (yCursor - rowHeight < bottomMargin) {
+          startNewPage(tableTitle);
+          drawTableHeader();
+        }
+
+        currentPage.drawRectangle({
+          x: margin,
+          y: yCursor - rowHeight,
+          width: printableWidth,
+          height: rowHeight,
+          color: rgb(0.94, 0.96, 0.98),
+          borderColor: rgb(0.75, 0.8, 0.85),
+          borderWidth: 0.75
+        });
+
+        let currentColX = margin;
+        summaryRow.forEach((cell, cellIdx) => {
+          const col = columns[cellIdx];
+          const cellFont = cell.isBold ? fontBold : font;
+          const cellColor = cell.color || rgb(0.1, 0.15, 0.25);
+          const displayText = sanitizePdfText(cell.text || '');
+          const actualWidth = cellFont.widthOfTextAtSize(displayText, 7.5);
+
+          let textX = currentColX + 6;
+          if (col.align === 'right') {
+            textX = currentColX + col.width - actualWidth - 6;
+          } else if (col.align === 'center') {
+            textX = currentColX + (col.width - actualWidth) / 2;
+          }
+
+          currentPage.drawText(displayText, {
+            x: textX,
+            y: yCursor - 12,
+            size: 7.5,
+            font: cellFont,
+            color: cellColor
+          });
+
+          currentColX += col.width;
+        });
+
+        yCursor -= rowHeight;
+      }
+
+      yCursor -= 14;
+    };
+
+    // ==========================================
+    // SECTION 1: VEHICLE TYPE SUMMARY TABLE
+    // ==========================================
+    if (options.reportType === 'summary' || options.reportType === 'both') {
+      const typeColumns: Array<{ header: string; width: number; align?: 'left' | 'right' | 'center' }> = [
+        { header: 'Vehicle Type', width: 140, align: 'left' },
+        { header: 'Total Vehicles', width: 120, align: 'right' },
+        { header: 'Dispatches Count', width: 130, align: 'right' },
+        { header: 'Loaded Pallets', width: 130, align: 'right' },
+        { header: 'Total Available Capacity', width: 140, align: 'right' },
+        { header: 'Utilization %', width: printableWidth - (140 + 120 + 130 + 130 + 140), align: 'right' }
+      ];
+
+      const typeRows = data.vehicleTypeSummary.map((t) => [
+        { text: `${t.vehicleType} Vehicles`, isBold: true },
+        { text: t.totalVehicles.toLocaleString() },
+        { text: t.dispatches.toLocaleString() },
+        { text: t.loadedPallets.toLocaleString() },
+        { text: `${t.availableCapacity.toLocaleString()} Pallets` },
+        {
+          text: `${t.utilizationPct.toFixed(2)}%`,
+          isBold: true,
+          color: t.utilizationPct > 100 ? rgb(0.8, 0.1, 0.1) : t.utilizationPct >= 80 ? rgb(0.85, 0.45, 0.05) : rgb(0.08, 0.55, 0.3)
+        }
+      ]);
+
+      const typeSummaryRow = [
+        { text: 'TOTAL FLEET', isBold: true },
+        { text: data.summary.totalVehicles.toLocaleString(), isBold: true },
+        { text: data.summary.totalDispatches.toLocaleString(), isBold: true },
+        { text: data.summary.totalLoadedPallets.toLocaleString(), isBold: true },
+        { text: `${data.summary.totalAvailableCapacity.toLocaleString()} Pallets`, isBold: true },
+        { text: `${data.summary.fleetUtilizationPct.toFixed(2)}%`, isBold: true, color: rgb(0.08, 0.55, 0.3) }
+      ];
+
+      drawTable('1. Summary by Vehicle Type', typeColumns, typeRows, typeSummaryRow);
+
+      // ==========================================
+      // SECTION 2: ALL VEHICLE UTILIZATION TABLE
+      // ==========================================
+      const vehColumns: Array<{ header: string; width: number; align?: 'left' | 'right' | 'center' }> = [
+        { header: 'Sr.', width: 35, align: 'center' },
+        { header: 'Vehicle Number', width: 150, align: 'left' },
+        { header: 'Vehicle Type', width: 90, align: 'left' },
+        { header: 'DCs / Dispatches', width: 110, align: 'right' },
+        { header: 'Loaded Pallets', width: 120, align: 'right' },
+        { header: 'Available Capacity', width: 135, align: 'right' },
+        { header: 'Vehicle Utilization %', width: printableWidth - (35 + 150 + 90 + 110 + 120 + 135), align: 'right' }
+      ];
+
+      const vehRows = data.vehicles.map((v, i) => [
+        { text: String(i + 1) },
+        { text: v.vehicleNo, isBold: true },
+        { text: v.vehicleType },
+        { text: v.dispatchesCount.toLocaleString() },
+        { text: v.loadedPallets.toLocaleString() },
+        { text: `${v.availableCapacity.toLocaleString()} Pallets` },
+        {
+          text: `${v.utilizationPct.toFixed(2)}%`,
+          isBold: true,
+          color: v.utilizationPct > 100 ? rgb(0.8, 0.1, 0.1) : v.utilizationPct >= 80 ? rgb(0.85, 0.45, 0.05) : rgb(0.08, 0.55, 0.3)
+        }
+      ]);
+
+      const vehSummaryRow = [
+        { text: '' },
+        { text: `TOTAL (${data.vehicles.length} Vehicles)`, isBold: true },
+        { text: '' },
+        { text: data.summary.totalDispatches.toLocaleString(), isBold: true },
+        { text: data.summary.totalLoadedPallets.toLocaleString(), isBold: true },
+        { text: `${data.summary.totalAvailableCapacity.toLocaleString()} Pallets`, isBold: true },
+        { text: `${data.summary.fleetUtilizationPct.toFixed(2)}%`, isBold: true, color: rgb(0.08, 0.55, 0.3) }
+      ];
+
+      drawTable('2. Complete Fleet Vehicle Utilization Details', vehColumns, vehRows, vehSummaryRow);
+    }
+
+    // ==========================================
+    // SECTION 3: DETAILED DISPATCH-LEVEL DATA
+    // ==========================================
+    if ((options.reportType === 'detailed' || options.reportType === 'both') && data.dispatches.length > 0) {
+      ensureSpace(60, '3. Detailed Dispatch-Level Records');
+
+      const dispColumns: Array<{ header: string; width: number; align?: 'left' | 'right' | 'center' }> = [
+        { header: 'Sr.', width: 30, align: 'center' },
+        { header: 'DC Number', width: 95, align: 'left' },
+        { header: 'Date & Time', width: 110, align: 'left' },
+        { header: 'Vehicle Number', width: 105, align: 'left' },
+        { header: 'Type', width: 50, align: 'center' },
+        { header: 'Supervisor', width: 105, align: 'left' },
+        { header: 'Loaded', width: 55, align: 'right' },
+        { header: 'Capacity', width: 55, align: 'right' },
+        { header: 'Load Ratio %', width: 85, align: 'right' },
+        { header: 'Status', width: printableWidth - (30 + 95 + 110 + 105 + 50 + 105 + 55 + 55 + 85), align: 'center' }
+      ];
+
+      const dispRows = data.dispatches.map((d, idx) => [
+        { text: String(idx + 1) },
+        { text: d.dcNo, isBold: true },
+        { text: d.date },
+        { text: d.vehicleNo, isBold: true },
+        { text: d.vehicleSize },
+        { text: d.supplierName || '-' },
+        { text: d.loadedPallets.toLocaleString() },
+        { text: d.dispatchCapacity.toLocaleString() },
+        {
+          text: `${d.loadRatioPct.toFixed(2)}%`,
+          isBold: true,
+          color: d.loadRatioPct > 100 ? rgb(0.8, 0.1, 0.1) : d.loadRatioPct >= 80 ? rgb(0.85, 0.45, 0.05) : rgb(0.08, 0.55, 0.3)
+        },
+        { text: d.status ? d.status.toUpperCase() : 'COMPLETED' }
+      ]);
+
+      drawTable(`3. Detailed Dispatch-Level Records (${data.dispatches.length} Total Dispatches)`, dispColumns, dispRows);
+    }
+
+    // ==========================================
+    // FOOTER FOR ALL PAGES
+    // ==========================================
+    const totalPages = pdfDoc.getPageCount();
+    for (let i = 0; i < totalPages; i++) {
+      const p = pdfDoc.getPage(i);
+      const footerY = 22;
+
+      p.drawLine({
+        start: { x: margin, y: footerY + 12 },
+        end: { x: margin + printableWidth, y: footerY + 12 },
+        thickness: 0.5,
+        color: rgb(0.82, 0.86, 0.9)
+      });
+
+      p.drawText('I3PL INDIA PVT LTD | DC / Dispatch Management System', {
+        x: margin,
+        y: footerY,
+        size: 7.5,
+        font: fontBold,
+        color: rgb(0.35, 0.4, 0.45)
+      });
+
+      p.drawText('CONFIDENTIAL | VEHICLE UTILIZATION AUDIT REPORT', {
+        x: margin + 300,
+        y: footerY,
+        size: 7,
+        font,
+        color: rgb(0.5, 0.55, 0.6)
+      });
+
+      const pageStr = `Page ${i + 1} of ${totalPages}`;
+      const pageStrWidth = fontBold.widthOfTextAtSize(pageStr, 7.5);
+      p.drawText(pageStr, {
+        x: margin + printableWidth - pageStrWidth,
+        y: footerY,
+        size: 7.5,
+        font: fontBold,
+        color: rgb(0.2, 0.25, 0.3)
+      });
+    }
+
+    // Determine clean filename
+    const todayStr = new Date().toISOString().split('T')[0];
+    let fileName = '';
+    if (options.startDate && options.endDate) {
+      fileName = `Vehicle_Utilization_Report_${options.startDate}_to_${options.endDate}.pdf`;
+    } else {
+      const sanitizedRange = options.dateRangeLabel.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+      fileName = `Vehicle_Utilization_Report_${sanitizedRange}_${todayStr}.pdf`;
+    }
+
+    const defaultPrintsDir = app?.getPath ? app.getPath('downloads') : path.join(process.cwd(), 'dev-data', 'prints');
+    const printsDir = settings.printsFolder || defaultPrintsDir;
+    if (!fs.existsSync(printsDir)) {
+      fs.mkdirSync(printsDir, { recursive: true });
+    }
+
+    const destPath = path.join(printsDir, fileName);
+    const pdfBytes = await pdfDoc.save();
+    fs.writeFileSync(destPath, pdfBytes);
+
+    logAudit(
+      'EXPORT_UTILIZATION_PDF',
+      `Exported Vehicle Utilization Report PDF (${totalPages} pages) for ${options.dateRangeLabel} to ${destPath}`
+    );
+
+    try {
+      if (shell?.openPath) {
+        await shell.openPath(destPath);
+      }
+    } catch (openErr) {
+      console.error('Failed to open exported PDF automatically:', openErr);
+    }
+
+    const base64 = Buffer.from(pdfBytes).toString('base64');
+    return { success: true, filePath: destPath, base64 };
+  } catch (err: any) {
+    console.error('Failed to generate vehicle utilization report PDF:', err);
+    throw err;
+  }
+};
+

@@ -32,6 +32,7 @@ declare global {
         printChallan(dispatch: Dispatch, items: DispatchItem[]): Promise<{ success: boolean; filePath: string }>;
         printBarcodes(items: DispatchItem[], dispatch?: Dispatch): Promise<{ success: boolean; filePath: string }>;
         printCombinedDispatch(dispatch: Dispatch, items: DispatchItem[]): Promise<{ success: boolean; filePath: string }>;
+        exportVehicleUtilizationReport(options: any, data: any): Promise<{ success: boolean; filePath: string; base64?: string }>;
       };
       clipboard?: {
         write(data: { text: string; html?: string }): Promise<boolean>;
@@ -146,6 +147,35 @@ export const printService = {
   printCombinedDispatch: async (dispatch: Dispatch, items: DispatchItem[]): Promise<{ success: boolean; filePath: string }> => {
     if (!api) throw new Error('Electron API not available');
     return api.print.printCombinedDispatch(dispatch, items);
+  },
+  exportVehicleUtilizationReport: async (options: any, data: any): Promise<{ success: boolean; filePath: string; base64?: string }> => {
+    if (!api) throw new Error('Electron API not available');
+    const res = await api.print.exportVehicleUtilizationReport(options, data);
+    
+    // Also trigger browser-side download if base64 returned (provides direct download feedback)
+    if (res?.base64 && typeof document !== 'undefined') {
+      try {
+        const byteCharacters = atob(res.base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const fileName = res.filePath ? res.filePath.split(/[/\\]/).pop() || 'Vehicle_Utilization_Report.pdf' : 'Vehicle_Utilization_Report.pdf';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (dlErr) {
+        console.warn('Browser download fallback skipped:', dlErr);
+      }
+    }
+    return res;
   }
 };
 

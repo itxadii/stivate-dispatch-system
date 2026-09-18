@@ -521,7 +521,8 @@ export const DispatchPipeline: React.FC<DispatchPipelineProps> = ({
                           const vSize = d.vehicle_size || '32 ft';
                           const maxP = getVehicleMaxPallets(vSize);
                           const curP = d.total_pallets || 1;
-                          const utilPct = Math.round((curP / maxP) * 100);
+                          const rawPct = (curP / maxP) * 100;
+                          const utilPct = rawPct % 1 === 0 ? rawPct.toFixed(0) : rawPct.toFixed(2);
                           if (d.is_empty_pallets) {
                             return (
                               <div className="text-[10px] font-semibold text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
@@ -532,7 +533,7 @@ export const DispatchPipeline: React.FC<DispatchPipelineProps> = ({
                           return (
                             <div className="text-[10px] font-semibold text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
                               <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">{vSize}</span>
-                              <span className={utilPct > 100 ? 'text-rose-600 font-extrabold' : 'text-slate-500 font-bold'}>
+                              <span className={rawPct > 100 ? 'text-rose-600 font-extrabold' : 'text-slate-500 font-bold'}>
                                 {curP}/{maxP} Pallets ({utilPct}%)
                               </span>
                             </div>

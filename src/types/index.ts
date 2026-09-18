@@ -41,6 +41,7 @@ export interface Dispatch {
   created_at?: string;
   status?: 'loading' | 'ready' | 'completed';
   is_empty_pallets?: boolean | number;
+  total_pull_lists?: number;
   items?: DispatchItem[];
 }
 
@@ -56,7 +57,10 @@ export const getVehicleMaxPallets = (vehicleSize?: string): number => {
   if (match) {
     const ft = parseInt(match[1], 10);
     if (!isNaN(ft) && ft > 0) {
-      return Math.max(1, Math.floor(ft / 2));
+      if (ft >= 30) return 16;
+      if (ft >= 20) return 8;
+      if (ft >= 10) return 2;
+      return Math.max(1, Math.round((ft / 32) * 16));
     }
   }
   return 16;
