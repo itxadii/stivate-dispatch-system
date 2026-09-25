@@ -8,10 +8,11 @@ import {
   Layers,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Mail
 } from 'lucide-react';
 import { getVehicleMaxPallets } from '../types';
-import { printService } from '../services/ipc';
+import { printService, emailService } from '../services/ipc';
 
 export type DateRangeType =
   | 'all'
@@ -61,8 +62,10 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
   const [includeCompleteFleet, setIncludeCompleteFleet] = useState<boolean>(true);
 
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [isEmailing, setIsEmailing] = useState<boolean>(false);
   const [exportError, setExportError] = useState<string>('');
   const [exportSuccessPath, setExportSuccessPath] = useState<string>('');
+  const [emailSuccessMsg, setEmailSuccessMsg] = useState<string>('');
 
   // Extract distinct DCs
   const distinctDcs = useMemo(() => {
@@ -422,6 +425,26 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
     }
   };
 
+  const handleEmailReport = async () => {
+    setIsEmailing(true);
+    setExportError('');
+    setEmailSuccessMsg('');
+    try {
+      const res = await emailService.sendVehicleUtilizationReport({
+        dateRange: dateRange === '7days' ? 'last7days' : dateRange === 'all' ? 'all' : 'today',
+      });
+      if (res.success) {
+        setEmailSuccessMsg(res.message);
+      } else {
+        setExportError(res.message);
+      }
+    } catch (err: any) {
+      setExportError(err.message || 'Failed to email report.');
+    } finally {
+      setIsEmailing(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
@@ -468,6 +491,19 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
                   File has been saved to your computer and opened in your PDF reader.
                 </span>
               </div>
+            </div>
+          )}
+
+          {/* Email Success Banner */}
+          {emailSuccessMsg && (
+            <div className="p-4 bg-sky-50 border border-sky-200 rounded-xl space-y-1">
+              <div className="flex items-center gap-2 text-sky-900 font-bold text-sm">
+                <CheckCircle2 size={18} className="text-sky-600 shrink-0" />
+                <span>Report Emailed Successfully!</span>
+              </div>
+              <p className="text-xs text-sky-800 pl-6">
+                {emailSuccessMsg}
+              </p>
             </div>
           )}
 
@@ -748,8 +784,27 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
             </button>
             <button
               type="button"
+              onClick={handleEmailReport}
+              disabled={isEmailing || isExporting}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 active:bg-sky-200 disabled:opacity-60 rounded-xl transition-all shadow-xs cursor-pointer"
+              title="Email utilization report to configured recipients from noreply@stivate.com"
+            >
+              {isEmailing ? (
+                <>
+                  <Loader2 size={14} className="animate-spin text-sky-600" />
+                  <span>Sending Email...</span>
+                </>
+              ) : (
+                <>
+                  <Mail size={14} className="text-sky-600" />
+                  <span>Email Report to Recipients</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
               onClick={handleExport}
-              disabled={isExporting}
+              disabled={isExporting || isEmailing}
               className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60 rounded-xl transition-all shadow-sm cursor-pointer"
             >
               {isExporting ? (

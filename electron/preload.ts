@@ -33,6 +33,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     printCombinedDispatch: (dispatch: any, items: any[]) => ipcRenderer.invoke('print:combined', dispatch, items),
     exportVehicleUtilizationReport: (options: any, data: any) => ipcRenderer.invoke('print:exportVehicleUtilizationReport', options, data),
   },
+  email: {
+    sendVehicleUtilizationReport: (options?: any) => ipcRenderer.invoke('email:sendVehicleUtilizationReport', options),
+    testSmtpConnection: (overrideSettings?: any) => ipcRenderer.invoke('email:testSmtpConnection', overrideSettings),
+  },
   clipboard: {
     write: (data: { text: string; html?: string }) => ipcRenderer.invoke('clipboard:write', data),
   },

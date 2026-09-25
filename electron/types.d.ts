@@ -32,6 +32,10 @@ interface ElectronAPI {
     printCombinedDispatch: (dispatch: any, items: any[]) => Promise<void>;
     exportVehicleUtilizationReport: (options: any, data: any) => Promise<{ success: boolean; filePath: string; base64?: string }>;
   };
+  email: {
+    sendVehicleUtilizationReport: (options?: any) => Promise<{ success: boolean; message: string; messageId?: string; filePath?: string; sentCount?: number; recipientsList?: string[] }>;
+    testSmtpConnection: (overrideSettings?: any) => Promise<{ success: boolean; message: string }>;
+  };
   clipboard?: {
     write: (data: { text: string; html?: string }) => Promise<boolean>;
   };

@@ -34,6 +34,15 @@ declare global {
         printCombinedDispatch(dispatch: Dispatch, items: DispatchItem[]): Promise<{ success: boolean; filePath: string }>;
         exportVehicleUtilizationReport(options: any, data: any): Promise<{ success: boolean; filePath: string; base64?: string }>;
       };
+      email: {
+        sendVehicleUtilizationReport(options?: {
+          customTo?: string | string[];
+          dateRange?: 'weekly' | 'daily' | 'today' | 'last7days' | 'all';
+          reportFrequency?: 'weekly' | 'daily';
+          recipientId?: string;
+        }): Promise<{ success: boolean; message: string; messageId?: string; filePath?: string; sentCount?: number; recipientsList?: string[] }>;
+        testSmtpConnection(overrideSettings?: any): Promise<{ success: boolean; message: string }>;
+      };
       clipboard?: {
         write(data: { text: string; html?: string }): Promise<boolean>;
       };
@@ -228,4 +237,20 @@ export const clipboardService = {
       return false;
     }
   }
+};
+
+export const emailService = {
+  sendVehicleUtilizationReport: async (options?: {
+    customTo?: string | string[];
+    dateRange?: 'weekly' | 'daily' | 'today' | 'last7days' | 'all';
+    reportFrequency?: 'weekly' | 'daily';
+    recipientId?: string;
+  }): Promise<{ success: boolean; message: string; messageId?: string; filePath?: string; sentCount?: number; recipientsList?: string[] }> => {
+    if (!api) throw new Error('Electron API not available');
+    return api.email.sendVehicleUtilizationReport(options);
+  },
+  testSmtpConnection: async (overrideSettings?: any): Promise<{ success: boolean; message: string }> => {
+    if (!api) throw new Error('Electron API not available');
+    return api.email.testSmtpConnection(overrideSettings);
+  },
 };

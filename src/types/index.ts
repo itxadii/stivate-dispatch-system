@@ -1,3 +1,31 @@
+export interface ReportRecipient {
+  id: string;
+  name?: string;
+  email: string;
+  frequency: 'weekly' | 'daily' | 'both';
+  enabled: boolean;
+  notes?: string;
+}
+
+export interface EmailSettings {
+  enabled: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  smtpSecure: boolean;
+  smtpUser: string;
+  smtpPassword?: string;
+  fromEmail: string;
+  toEmail: string;
+  autoSendDaily: boolean;
+  autoSendTime: string;
+  autoSendWeekly?: boolean;
+  weeklySendDay?: number; // 0=Sunday, 1=Monday, etc. Default 1 (Monday)
+  weeklySendTime?: string;
+  lastReportSentDate?: string;
+  lastWeeklyReportSentDate?: string;
+  recipients?: ReportRecipient[];
+}
+
 export interface AppSettings {
   companyName: string;
   address: string;
@@ -21,6 +49,7 @@ export interface AppSettings {
   warehouseLocation?: string;
   lastCloudBackupTime?: number;
   lastHourlyCloudBackupTime?: number;
+  emailSettings?: EmailSettings;
 }
 
 export interface Dispatch {

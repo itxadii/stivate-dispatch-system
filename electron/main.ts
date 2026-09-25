@@ -28,6 +28,7 @@ import {
   getBackupList
 } from './ipc/backup';
 import { printChallan, printBarcodes, printCombinedDispatch, exportVehicleUtilizationReport } from './ipc/printer';
+import { sendVehicleUtilizationReportEmail, testSmtpConnection, checkAndRunPeriodicEmailReport } from './ipc/email';
 import { checkForUpdates, downloadUpdate, installUpdate, getUpdateInfo, initUpdater } from './updater';
 
 let mainWindow: BrowserWindow | null = null;
@@ -174,10 +175,12 @@ app.whenReady().then(() => {
     console.error('Failed to initialize database or run seed on startup:', err);
   }
 
-  // Initiate periodic backup check (every 15 minutes to reliably catch hourly & 3-day windows)
+  // Initiate periodic backup and automated email report checks
   checkAndRunPeriodicBackup();
+  checkAndRunPeriodicEmailReport();
   setInterval(() => {
     checkAndRunPeriodicBackup();
+    checkAndRunPeriodicEmailReport();
   }, 15 * 60 * 1000);
 
   // Register IPC handlers
@@ -267,6 +270,15 @@ app.whenReady().then(() => {
 
   ipcMain.handle('print:exportVehicleUtilizationReport', (_, options, data) => {
     return exportVehicleUtilizationReport(options, data);
+  });
+
+  // Automated Email Reports IPC handlers
+  ipcMain.handle('email:sendVehicleUtilizationReport', (_, options) => {
+    return sendVehicleUtilizationReportEmail(options);
+  });
+
+  ipcMain.handle('email:testSmtpConnection', (_, overrideSettings) => {
+    return testSmtpConnection(overrideSettings);
   });
 
   // Updater IPC handlers

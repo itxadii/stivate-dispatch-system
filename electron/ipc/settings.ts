@@ -2,6 +2,34 @@ import { app } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 
+export interface ReportRecipient {
+  id: string;
+  name?: string;
+  email: string;
+  frequency: 'weekly' | 'daily' | 'both';
+  enabled: boolean;
+  notes?: string;
+}
+
+export interface EmailSettings {
+  enabled: boolean;
+  smtpHost: string;
+  smtpPort: number;
+  smtpSecure: boolean;
+  smtpUser: string;
+  smtpPassword?: string;
+  fromEmail: string;
+  toEmail: string;
+  autoSendDaily: boolean;
+  autoSendTime: string;
+  autoSendWeekly?: boolean;
+  weeklySendDay?: number; // 0=Sunday, 1=Monday, etc. Default 1 (Monday)
+  weeklySendTime?: string;
+  lastReportSentDate?: string;
+  lastWeeklyReportSentDate?: string;
+  recipients?: ReportRecipient[];
+}
+
 export interface AppSettings {
   companyName: string;
   address: string;
@@ -29,6 +57,7 @@ export interface AppSettings {
   warehouseLocation?: string;
   lastCloudBackupTime?: number;
   lastHourlyCloudBackupTime?: number;
+  emailSettings?: EmailSettings;
 }
 
 /**
@@ -155,6 +184,30 @@ export const getDefaultSettings = (): AppSettings => {
     defaultVehicleSize: '32 ft',
 
     warehouseLocation: 'F W H',
+    emailSettings: {
+      enabled: true,
+      smtpHost: 'smtp.purelymail.com',
+      smtpPort: 465,
+      smtpSecure: true,
+      smtpUser: 'noreply@stivate.com',
+      smtpPassword: 'noreply@123@stivate.com',
+      fromEmail: 'noreply@stivate.com',
+      toEmail: 'aditya@stivate.com',
+      autoSendDaily: true,
+      autoSendTime: '20:00',
+      autoSendWeekly: true,
+      weeklySendDay: 1, // Monday
+      weeklySendTime: '20:00',
+      recipients: [
+        {
+          id: 'rec-1',
+          name: 'Aditya',
+          email: 'aditya@stivate.com',
+          frequency: 'both',
+          enabled: true,
+        },
+      ],
+    },
   };
 };
 
@@ -176,10 +229,27 @@ export const loadSettings = (): AppSettings => {
         fs.readFileSync(fileToRead, 'utf8')
       );
 
-      return {
+      const loaded = {
         ...getDefaultSettings(),
         ...saved,
       };
+
+      // Ensure recipients list is preserved even if user deleted all recipients
+      if (loaded.emailSettings) {
+        if (saved.emailSettings && Array.isArray(saved.emailSettings.recipients)) {
+          loaded.emailSettings.recipients = saved.emailSettings.recipients;
+        } else if (!loaded.emailSettings.recipients || !Array.isArray(loaded.emailSettings.recipients)) {
+          loaded.emailSettings.recipients = [];
+        }
+
+        // Clean any '(Primary)' suffix from recipient names
+        loaded.emailSettings.recipients = loaded.emailSettings.recipients.map((r: any) => ({
+          ...r,
+          name: (r.name || '').replace(/\s*\(Primary\)/i, '').trim() || r.name,
+        }));
+      }
+
+      return loaded;
     }
   } catch (err) {
     console.error('Failed to load settings:', err);

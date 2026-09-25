@@ -44,6 +44,31 @@
   "defaultVehicleNo": "MH-12-QW-1234",
   "defaultVehicleSize": "32 ft",
   "warehouseLocation": "F Warehouse",
-  "lastCloudBackupTime": 1789724923610,
-  "lastHourlyCloudBackupTime": 1789724923610
+  "emailSettings": {
+    "enabled": true,
+    "smtpHost": "smtp.purelymail.com",
+    "smtpPort": 465,
+    "smtpSecure": true,
+    "smtpUser": "noreply@stivate.com",
+    "smtpPassword": "noreply@123@stivate.com",
+    "fromEmail": "noreply@stivate.com",
+    "toEmail": "aditya@stivate.com",
+    "autoSendDaily": true,
+    "autoSendTime": "23:00",
+    "autoSendWeekly": true,
+    "weeklySendDay": 1,
+    "weeklySendTime": "23:00",
+    "lastReportSentDate": "2026-09-24",
+    "recipients": [
+      {
+        "id": "rec-1",
+        "name": "Aditya",
+        "email": "aditya@stivate.com",
+        "frequency": "both",
+        "enabled": true
+      }
+    ]
+  },
+  "lastCloudBackupTime": 1790272449268,
+  "lastHourlyCloudBackupTime": 1790326272517
 }

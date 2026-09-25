@@ -976,12 +976,15 @@ export const exportVehicleUtilizationReport = async (
       color: rgb(0.1, 0.45, 0.75)
     });
 
-    currentPage.drawText('DC / Dispatch Management System | Fleet Pallet Load & Capacity Analysis', {
+    const whSettings = loadSettings();
+    const whLocation = (whSettings.warehouseLocation || 'F Warehouse').trim();
+
+    currentPage.drawText(`Facility: ${sanitizePdfText(whLocation)} | Fleet Pallet Load & Capacity Analysis`, {
       x: headerTextX,
       y: yCursor - 47,
       size: 8,
       font,
-      color: rgb(0.4, 0.45, 0.5)
+      color: rgb(0.2, 0.3, 0.45)
     });
 
     // Right Metadata Grid in Header Box
