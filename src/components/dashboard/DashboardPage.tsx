@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { databaseService, settingsService } from '../../services/ipc';
+import { toLocalYmd } from '../../utils/date';
 import type { DashboardStats, Dispatch } from '../../types';
 import { VehicleUtilizationExportModal, type DateRangeType } from '../VehicleUtilizationExportModal';
 import { DashboardStatCards } from './DashboardStatCards';
@@ -50,8 +51,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ setActiveTab, onEd
 
   // Vehicle Utilization Tracker Date Range & PDF Export State
   const [trackerDateRange, setTrackerDateRange] = useState<DateRangeType>('all');
-  const [trackerCustomFrom, setTrackerCustomFrom] = useState<string>(() => new Date().toISOString().split('T')[0]);
-  const [trackerCustomTo, setTrackerCustomTo] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [trackerCustomFrom, setTrackerCustomFrom] = useState<string>(() => toLocalYmd());
+  const [trackerCustomTo, setTrackerCustomTo] = useState<string>(() => toLocalYmd());
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   // Detail Modal State for viewing dispatches from dashboard

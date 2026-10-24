@@ -6,11 +6,10 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
-const S3_CREDENTIALS = {
-  accessKeyId: 'AKIATXMECZM3MDCYHAUY',
-  secretAccessKey: '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'
-};
-const S3_BUCKET = 'dispatch-backup-i3pl';
+// Never hardcode cloud credentials: they ship inside the installer and the git history.
+// Credentials are resolved by the AWS SDK default provider chain (AWS_ACCESS_KEY_ID /
+// AWS_SECRET_ACCESS_KEY env vars or the %USERPROFILE%\.aws\credentials file on the machine).
+const S3_BUCKET = process.env.DISPATCH_BACKUP_BUCKET || 'dispatch-backup-i3pl';
 const PRIMARY_REGION = 'ap-south-1';
 const FALLBACK_REGION = 'us-east-1';
 
@@ -42,14 +41,12 @@ const executeS3Command = async <T>(commandFactory: () => any): Promise<T> => {
   try {
     const s3Client = new S3Client({
       region: PRIMARY_REGION,
-      credentials: S3_CREDENTIALS
     });
     return await s3Client.send(commandFactory()) as T;
   } catch (primaryErr) {
     console.warn(`S3 command failed in ${PRIMARY_REGION}, trying fallback ${FALLBACK_REGION}:`, primaryErr);
     const fallbackClient = new S3Client({
       region: FALLBACK_REGION,
-      credentials: S3_CREDENTIALS
     });
     return await fallbackClient.send(commandFactory()) as T;
   }
@@ -124,7 +121,13 @@ export const backupDatabase = (): { success: boolean; message: string } => {
     // Prune backups (keep latest 30 timestamped backups)
     pruneBackups(backupDir);
 
-    updateLastArchiveBackupTime();
+    // Note: cloud backup timestamps are only advanced by a successful cloud upload.
+    // Updating them here made a local (or offline) backup suppress cloud backups for 3 days.
+    try {
+      saveSettings({ ...loadSettings(), lastLocalBackupTime: Date.now() });
+    } catch (err) {
+      console.error('Failed to record lastLocalBackupTime:', err);
+    }
 
     return { success: true, message: `Local backup saved in ${warehouseFolder}: ${filename}` };
   } catch (err: any) {
@@ -264,6 +267,66 @@ export const uploadBackupToCloud = async (): Promise<{ success: boolean; message
 };
 
 /**
+ * Verify that a file is a readable SQLite database of this application before it
+ * replaces the live database. Throws with a user-facing message otherwise.
+ */
+const assertValidDispatchDatabase = (filePath: string) => {
+  const header = Buffer.alloc(16);
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    fs.readSync(fd, header, 0, 16, 0);
+  } finally {
+    fs.closeSync(fd);
+  }
+  if (header.toString('latin1') !== 'SQLite format 3\u0000') {
+    throw new Error('Selected file is not a SQLite database backup.');
+  }
+
+  const Database = require('better-sqlite3');
+  const probe = new Database(filePath, { readonly: true, fileMustExist: true });
+  try {
+    const check = probe.pragma('quick_check', { simple: true });
+    if (check !== 'ok') {
+      throw new Error(`Backup file failed integrity check: ${check}`);
+    }
+    const table = probe.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'dispatches'").get();
+    if (!table) {
+      throw new Error('Backup file does not contain dispatch data (missing dispatches table).');
+    }
+  } finally {
+    probe.close();
+  }
+};
+
+/**
+ * Replace the live database file with a validated source file.
+ * Stale -wal/-shm files of the old database are removed so SQLite cannot replay them
+ * on top of the restored file.
+ */
+const replaceLiveDatabase = (sourcePath: string, dbPath: string) => {
+  const { closeDb, getDb } = require('./database');
+  closeDb();
+
+  // Create safety copy of current db before overwriting
+  if (fs.existsSync(dbPath)) {
+    const safetyCopy = `${dbPath}.safety_${Date.now()}`;
+    fs.copyFileSync(dbPath, safetyCopy);
+  }
+
+  for (const suffix of ['-wal', '-shm']) {
+    const sidecar = `${dbPath}${suffix}`;
+    if (fs.existsSync(sidecar)) {
+      fs.unlinkSync(sidecar);
+    }
+  }
+
+  fs.copyFileSync(sourcePath, dbPath);
+
+  // Reopen database connection
+  getDb();
+};
+
+/**
  * Restore database from the cloud live state `backups/{WAREHOUSE}/latest.db`.
  * Ideal for hardware replacement or disaster recovery up to the last hour.
  */
@@ -291,18 +354,17 @@ export const restoreFromCloudLatest = async (): Promise<{ success: boolean; mess
       return { success: false, message: 'Cloud backup file was empty.' };
     }
 
-    // Close active SQLite connection before overwriting
-    const { closeDb, getDb } = require('./database');
-    closeDb();
-
-    // Create safety copy of current db before overwriting
-    if (fs.existsSync(dbPath)) {
-      const safetyCopy = `${dbPath}.safety_${Date.now()}`;
-      fs.copyFileSync(dbPath, safetyCopy);
+    // Validate the download in a temp file before touching the live database
+    const tempPath = `${dbPath}.cloud_download_${Date.now()}`;
+    fs.writeFileSync(tempPath, fileBuffer);
+    try {
+      assertValidDispatchDatabase(tempPath);
+      replaceLiveDatabase(tempPath, dbPath);
+    } finally {
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath);
+      }
     }
-
-    // Save downloaded database
-    fs.writeFileSync(dbPath, fileBuffer);
 
     // Also update local latest.db
     const baseBackupDir = settings.backupFolder;
@@ -310,9 +372,6 @@ export const restoreFromCloudLatest = async (): Promise<{ success: boolean; mess
     if (fs.existsSync(backupDir)) {
       fs.writeFileSync(path.join(backupDir, 'latest.db'), fileBuffer);
     }
-
-    // Reopen database connection
-    getDb();
 
     const sizeKb = (fileBuffer.length / 1024).toFixed(1);
     return {
@@ -352,8 +411,12 @@ export const checkAndRunPeriodicBackup = async (): Promise<{ ran: boolean; messa
     // 1. Check 3-Day Archive Backup
     if (now - last3DayTime >= THREE_DAYS_MS) {
       console.log('[Auto Backup] 3-Day periodic auto backup triggered...');
-      const localRes = backupDatabase();
-      console.log('[Auto Backup] 3-Day local snapshot result:', localRes.message);
+      // Local snapshot has its own timer so repeated cloud retries while offline
+      // don't create a snapshot every 15 minutes and prune away older history.
+      if (now - (settings.lastLocalBackupTime || 0) >= THREE_DAYS_MS) {
+        const localRes = backupDatabase();
+        console.log('[Auto Backup] 3-Day local snapshot result:', localRes.message);
+      }
 
       const cloudRes = await uploadBackupToCloud();
       console.log('[Auto Backup] 3-Day cloud archive result:', cloudRes.message);
@@ -415,21 +478,12 @@ export const restoreDatabase = (backupFilePath?: string): { success: boolean; me
       return { success: false, message: `Backup file not found: ${sourcePath}` };
     }
 
-    // Close active SQLite connection before overwriting
-    const { closeDb, getDb } = require('./database');
-    closeDb();
-
-    // Create safety copy of current db before overwriting
-    if (fs.existsSync(dbPath)) {
-      const safetyCopy = `${dbPath}.safety_${Date.now()}`;
-      fs.copyFileSync(dbPath, safetyCopy);
+    if (path.resolve(sourcePath) === path.resolve(dbPath)) {
+      return { success: false, message: 'Cannot restore the live database onto itself.' };
     }
 
-    // Overwrite database.db with the selected backup
-    fs.copyFileSync(sourcePath, dbPath);
-
-    // Reopen database connection
-    getDb();
+    assertValidDispatchDatabase(sourcePath);
+    replaceLiveDatabase(sourcePath, dbPath);
 
     const restoredFileName = path.basename(sourcePath);
     return { success: true, message: `Database successfully restored from ${restoredFileName}!` };

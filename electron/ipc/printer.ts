@@ -5,6 +5,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { loadSettings } from './settings';
 import { logAudit } from './database';
 import { print as printPdf } from 'pdf-to-printer';
+import { toLocalYmd } from './dateUtils';
 
 // Code 39 Pattern Map: '0' = narrow, '1' = wide
 const CODE39: Record<string, string> = {
@@ -857,7 +858,8 @@ export const exportVehicleUtilizationReport = async (
       loadRatioPct: number;
       status: string;
     }>;
-  }
+  },
+  exportOptions: { openAfterExport?: boolean } = {}
 ): Promise<{ success: boolean; filePath: string; base64: string }> => {
   try {
     const cleanDateRangeLabel = sanitizePdfText(options.dateRangeLabel);
@@ -1441,7 +1443,7 @@ export const exportVehicleUtilizationReport = async (
     }
 
     // Determine clean filename
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = toLocalYmd();
     let fileName = '';
     if (options.startDate && options.endDate) {
       fileName = `Vehicle_Utilization_Report_${options.startDate}_to_${options.endDate}.pdf`;
@@ -1466,7 +1468,8 @@ export const exportVehicleUtilizationReport = async (
     );
 
     try {
-      if (shell?.openPath) {
+      // Unattended (scheduled email) exports must not pop the PDF open on the warehouse PC
+      if (exportOptions.openAfterExport !== false && shell?.openPath) {
         await shell.openPath(destPath);
       }
     } catch (openErr) {

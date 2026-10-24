@@ -134,6 +134,8 @@ export const NewDispatchPage: React.FC<NewDispatchProps> = ({
               dc_no: data.dc_no,
               date: data.date,
               vehicle_no: data.vehicle_no,
+              // Must be loaded, otherwise any save (incl. the unmount autosave) resets it to '32 ft'
+              vehicle_size: data.vehicle_size,
               supplier_name: data.supplier_name,
               address: data.address,
               total_pallets: data.total_pallets,
@@ -160,6 +162,7 @@ export const NewDispatchPage: React.FC<NewDispatchProps> = ({
             scanning_by: loadedSettings.defaultScanner || '',
             verify_by: loadedSettings.defaultVerifier || '',
             vehicle_no: loadedSettings.defaultVehicleNo || '',
+            vehicle_size: prev.vehicle_size || loadedSettings.defaultVehicleSize || '32 ft',
           }));
         }
       } catch (err) {
@@ -224,7 +227,12 @@ export const NewDispatchPage: React.FC<NewDispatchProps> = ({
           parts: numParts
         };
 
-        setItems((prev) => [newItem, ...prev]);
+        // Re-check inside the updater: fast scanner input can submit twice before `items` re-renders
+        setItems((prev) =>
+          prev.some(item => item.pull_list_no.replace(/_pending$/, '').toUpperCase() === cleanNo)
+            ? prev
+            : [newItem, ...prev]
+        );
         setPullListInput('');
         setSaveStatus(null);
 
@@ -285,7 +293,13 @@ export const NewDispatchPage: React.FC<NewDispatchProps> = ({
           workcell: masterItem.workcell || '',
           parts: masterItem.parts || 1
         };
-        setItems((prev) => [newItem, ...prev]);
+        // Re-check against the latest list: a double scan resolves two lookups against the same stale `items`
+        const newKey = newItem.pull_list_no.toUpperCase();
+        setItems((prev) =>
+          prev.some(item => item.pull_list_no.replace(/_pending$/, '').toUpperCase() === newKey)
+            ? prev
+            : [newItem, ...prev]
+        );
         setSaveStatus({ text: `Pull List ${cleanText} marked loaded successfully.`, type: 'success' });
         setTimeout(() => setSaveStatus(null), 3000);
       } else {

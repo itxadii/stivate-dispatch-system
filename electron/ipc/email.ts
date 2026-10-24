@@ -4,6 +4,7 @@ import * as path from 'path';
 import { loadSettings, saveSettings, AppSettings } from './settings';
 import { getAllDispatches, logAudit } from './database';
 import { exportVehicleUtilizationReport } from './printer';
+import { toLocalYmd, parseLocalYmd } from './dateUtils';
 
 /**
  * Standard vehicle maximum pallet capacities:
@@ -86,7 +87,7 @@ export const getMailerTransport = (settings: AppSettings) => {
     secure: isSecure,
     auth: {
       user: (emailCfg?.smtpUser || emailCfg?.fromEmail || 'noreply@stivate.com').trim(),
-      pass: (emailCfg?.smtpPassword || 'noreply@123@stivate.com').trim(),
+      pass: (emailCfg?.smtpPassword || '').trim(),
     },
     tls: {
       rejectUnauthorized: false,
@@ -116,7 +117,7 @@ export const buildVehicleUtilizationDataset = (
 ) => {
   const allDispatches: any[] = getAllDispatches();
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = toLocalYmd(now);
 
   // Exclude today's incomplete/ongoing dispatches
   const completedDispatches = allDispatches.filter((d: any) => {
@@ -126,10 +127,10 @@ export const buildVehicleUtilizationDataset = (
 
   // Calculate standard 7 completed days window (ending yesterday)
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yesterdayStr = toLocalYmd(yesterday);
 
   const weekStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate() - 6);
-  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekStartStr = toLocalYmd(weekStart);
 
   let filtered: any[] = [];
   let startDate = weekStartStr;
@@ -168,10 +169,10 @@ export const buildVehicleUtilizationDataset = (
         .filter(Boolean)
         .sort();
       const latestCompletedDate = dates[dates.length - 1];
-      const latestObj = new Date(latestCompletedDate);
+      const latestObj = parseLocalYmd(latestCompletedDate);
       const anchorStartObj = new Date(latestObj.getFullYear(), latestObj.getMonth(), latestObj.getDate() - 6);
 
-      startDate = anchorStartObj.toISOString().split('T')[0];
+      startDate = toLocalYmd(anchorStartObj);
       endDate = latestCompletedDate;
       filtered = completedDispatches.filter((d: any) => {
         const dDate = (d.date || '').slice(0, 10);
@@ -196,10 +197,10 @@ export const buildVehicleUtilizationDataset = (
   const dayBuckets = new Map<string, { date: string; dayLabel: string; dispatches: number; pallets: number; capacity: number }>();
 
   if (startDate && endDate) {
-    const curr = new Date(startDate);
-    const end = new Date(endDate);
+    const curr = parseLocalYmd(startDate);
+    const end = parseLocalYmd(endDate);
     while (curr <= end) {
-      const ymd = curr.toISOString().split('T')[0];
+      const ymd = toLocalYmd(curr);
       const dayName = curr.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' });
       dayBuckets.set(ymd, { date: ymd, dayLabel: dayName, dispatches: 0, pallets: 0, capacity: 0 });
       curr.setDate(curr.getDate() + 1);
@@ -642,7 +643,7 @@ export const sendVehicleUtilizationReportEmail = async (options?: {
       smtpPort: 465,
       smtpSecure: true,
       smtpUser: 'noreply@stivate.com',
-      smtpPassword: 'noreply@123@stivate.com',
+      smtpPassword: '',
       fromEmail: 'noreply@stivate.com',
       toEmail: 'aditya@stivate.com',
       autoSendDaily: true,
@@ -662,7 +663,7 @@ export const sendVehicleUtilizationReportEmail = async (options?: {
     };
 
     if (!emailCfg.smtpPassword) {
-      emailCfg.smtpPassword = 'noreply@123@stivate.com';
+      throw new Error('SMTP password is not configured. Set it in Settings > Vehicle Report Email.');
     }
     if (!emailCfg.smtpHost) {
       emailCfg.smtpHost = 'smtp.purelymail.com';
@@ -711,7 +712,7 @@ export const sendVehicleUtilizationReportEmail = async (options?: {
     const dataset = buildVehicleUtilizationDataset(effectiveDateRange as any);
 
     // 2. Generate PDF Report
-    const pdfResult = await exportVehicleUtilizationReport(dataset.options, dataset.data);
+    const pdfResult = await exportVehicleUtilizationReport(dataset.options, dataset.data, { openAfterExport: false });
     if (!pdfResult || !pdfResult.filePath || !fs.existsSync(pdfResult.filePath)) {
       throw new Error(`Failed to generate vehicle utilization ${reportType} PDF report.`);
     }
@@ -741,7 +742,10 @@ export const sendVehicleUtilizationReportEmail = async (options?: {
     const subjectTag = reportType === 'daily' ? '[Daily Report]' : '[Weekly Report]';
     const subject = `${subjectTag} [${warehouseLocation}] I3PL Fleet Load: ${dataset.data.summary.fleetUtilizationPct.toFixed(1)}% - ${dataset.options.dateRangeLabel}`;
 
+    // Send to each recipient independently: one bad address must not fail the whole run,
+    // otherwise the scheduler retries every 15 min and re-mails the recipients that succeeded.
     const sentMessageIds: string[] = [];
+    const failedRecipients: string[] = [];
     for (const recipient of targetRecipients) {
       const mailOptions = {
         from: `"Stivate" <${sender}>`,
@@ -751,19 +755,30 @@ export const sendVehicleUtilizationReportEmail = async (options?: {
         attachments,
       };
 
-      const info = await transporter.sendMail(mailOptions);
-      sentMessageIds.push(info.messageId);
-      console.log(`${reportType} vehicle utilization report successfully emailed to ${recipient}:`, info.messageId);
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        sentMessageIds.push(info.messageId);
+        console.log(`${reportType} vehicle utilization report successfully emailed to ${recipient}:`, info.messageId);
+      } catch (sendErr: any) {
+        failedRecipients.push(recipient);
+        console.error(`Failed to email ${reportType} vehicle utilization report to ${recipient}:`, sendErr);
+      }
+    }
+
+    if (sentMessageIds.length === 0) {
+      throw new Error(`Could not deliver report to any recipient (${failedRecipients.join(', ')}).`);
     }
 
     logAudit(
       'EMAIL_UTILIZATION_REPORT',
-      `Sent ${reportType} vehicle utilization report for ${warehouseLocation} to ${targetRecipients.join(', ')} (${sentMessageIds.length} delivered)`
+      `Sent ${reportType} vehicle utilization report for ${warehouseLocation} to ${targetRecipients.join(', ')} (${sentMessageIds.length} delivered${failedRecipients.length ? `, failed: ${failedRecipients.join(', ')}` : ''})`
     );
 
     return {
       success: true,
-      message: `${reportType === 'daily' ? 'Daily' : 'Weekly'} vehicle utilization report for ${warehouseLocation} successfully delivered to ${targetRecipients.length} recipient(s): ${targetRecipients.join(', ')}!`,
+      message: failedRecipients.length > 0
+        ? `${reportType === 'daily' ? 'Daily' : 'Weekly'} vehicle utilization report for ${warehouseLocation} delivered to ${sentMessageIds.length} of ${targetRecipients.length} recipient(s). Failed: ${failedRecipients.join(', ')}`
+        : `${reportType === 'daily' ? 'Daily' : 'Weekly'} vehicle utilization report for ${warehouseLocation} successfully delivered to ${targetRecipients.length} recipient(s): ${targetRecipients.join(', ')}!`,
       messageId: sentMessageIds[0],
       filePath: pdfResult.filePath,
       sentCount: sentMessageIds.length,
@@ -878,7 +893,7 @@ export const checkAndRunPeriodicEmailReport = async () => {
     }
 
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = toLocalYmd(now);
     const currentHour = now.getHours();
     const currentMin = now.getMinutes();
 
@@ -928,9 +943,16 @@ export const checkAndRunPeriodicEmailReport = async () => {
     }
 
     if (settingsUpdated) {
+      // Re-read settings: sending can take minutes, and the snapshot loaded above would
+      // otherwise overwrite anything saved meanwhile (backup timestamps, vehicles, user edits).
+      const latest = loadSettings();
       saveSettings({
-        ...settings,
-        emailSettings: updatedCfg,
+        ...latest,
+        emailSettings: {
+          ...(latest.emailSettings || updatedCfg),
+          lastReportSentDate: updatedCfg.lastReportSentDate,
+          lastWeeklyReportSentDate: updatedCfg.lastWeeklyReportSentDate,
+        },
       });
     }
   } catch (err) {

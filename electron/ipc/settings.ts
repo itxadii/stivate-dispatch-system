@@ -56,6 +56,7 @@ export interface AppSettings {
   defaultVehicleSize?: string;
   warehouseLocation?: string;
   lastCloudBackupTime?: number;
+  lastLocalBackupTime?: number;
   lastHourlyCloudBackupTime?: number;
   emailSettings?: EmailSettings;
 }
@@ -190,7 +191,8 @@ export const getDefaultSettings = (): AppSettings => {
       smtpPort: 465,
       smtpSecure: true,
       smtpUser: 'noreply@stivate.com',
-      smtpPassword: 'noreply@123@stivate.com',
+      // Never ship SMTP credentials in source; set in Settings or via env var
+      smtpPassword: process.env.DISPATCH_SMTP_PASSWORD || '',
       fromEmail: 'noreply@stivate.com',
       toEmail: 'aditya@stivate.com',
       autoSendDaily: true,

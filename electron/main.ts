@@ -76,7 +76,12 @@ function createWindow() {
 
       (async () => {
         try {
-          await checkAndRunPeriodicBackup();
+          // Cap the wait so a slow/offline network can't leave a hidden window running forever
+          const CLOSE_BACKUP_TIMEOUT_MS = 30 * 1000;
+          await Promise.race([
+            checkAndRunPeriodicBackup(),
+            new Promise((resolve) => setTimeout(resolve, CLOSE_BACKUP_TIMEOUT_MS)),
+          ]);
         } catch (err) {
           console.error('Auto backup on close failed:', err);
         } finally {

@@ -20,3 +20,11 @@ backups/
 
 # Environment
 .env
+# Runtime data: contains settings with credentials, live SQLite databases and printed challans
+dev-data/
+database/
+prints/
+*.db
+*.db-wal
+*.db-shm
+*.db.safety_*

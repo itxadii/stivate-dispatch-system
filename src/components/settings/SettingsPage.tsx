@@ -40,7 +40,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
       smtpPort: 465,
       smtpSecure: true,
       smtpUser: 'noreply@stivate.com',
-      smtpPassword: 'noreply@123@stivate.com',
+      smtpPassword: '',
       fromEmail: 'noreply@stivate.com',
       toEmail: 'aditya@stivate.com',
       autoSendDaily: true,
@@ -101,7 +101,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
           smtpPort: 465,
           smtpSecure: true,
           smtpUser: 'noreply@stivate.com',
-          smtpPassword: 'noreply@123@stivate.com',
+          smtpPassword: '',
           fromEmail: 'noreply@stivate.com',
           toEmail: 'aditya@stivate.com',
           autoSendDaily: true,
@@ -156,7 +156,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
           smtpPort: 465,
           smtpSecure: true,
           smtpUser: 'noreply@stivate.com',
-          smtpPassword: 'noreply@123@stivate.com',
+          smtpPassword: '',
           fromEmail: 'noreply@stivate.com',
           toEmail: 'aditya@stivate.com',
           autoSendDaily: true,
@@ -567,7 +567,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
             </div>
           )}
 
-          {/* General Settings: Visible ONLY when unlocked with password i3pl@123 */}
+          {/* General Settings: Visible ONLY when unlocked with the administrator password */}
           {isUnlocked && (
             <>
               <CompanyAndPrinterSettings
@@ -620,7 +620,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
           />
         </form>
 
-        {/* Right Actions Column (Locked unless administrator unlocks with i3pl@123) */}
+        {/* Right Actions Column (Locked unless administrator unlocks it) */}
         {isUnlocked && (
           <div className="space-y-6 flex flex-col h-full min-h-[300px]">
             <BackupOperations

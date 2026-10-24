@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import * as path from 'path';
 import * as fs from 'fs';
 import { loadSettings, saveSettings } from './settings';
+import { toLocalYmd } from './dateUtils';
 
 let dbInstance: any | null = null;
 let currentDbPath = '';
@@ -536,7 +537,7 @@ export const importMasterData = (rows: any[]) => {
 
 export const getDashboardStats = () => {
   const db = getDb();
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = toLocalYmd();
 
   const todayDispatches = db.prepare('SELECT COUNT(*) as count FROM dispatches WHERE date LIKE ?').get(`${todayStr}%`) as { count: number };
   const totalDispatches = db.prepare('SELECT COUNT(*) as count FROM dispatches').get() as { count: number };
@@ -732,7 +733,7 @@ export const getTrendData = (range: string) => {
   const db = getDb();
   
   if (range === 'thisMonth') {
-    const currentMonthPrefix = new Date().toISOString().substring(0, 7) + '%';
+    const currentMonthPrefix = toLocalYmd().substring(0, 7) + '%';
     return db.prepare(`
       SELECT SUBSTR(date, 1, 10) as date, COUNT(*) as count 
       FROM dispatches 
@@ -775,7 +776,7 @@ export const getTrendData = (range: string) => {
 
 export const getPipelineStats = () => {
   const db = getDb();
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = toLocalYmd();
 
   const loadingRow = db.prepare("SELECT COUNT(*) as count FROM dispatches WHERE status = 'loading'").get() as { count: number };
   const readyRow = db.prepare("SELECT COUNT(*) as count FROM dispatches WHERE status = 'ready'").get() as { count: number };

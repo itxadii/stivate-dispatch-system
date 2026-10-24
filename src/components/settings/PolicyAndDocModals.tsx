@@ -227,7 +227,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
               <div className="space-y-3">
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 space-y-1">
                   <strong>Reports Password Lock:</strong>
-                  <p>The Reports & Analytics tab is protected with password security. Access password: <code className="font-mono font-extrabold bg-white px-2 py-0.5 rounded border border-rose-300">i3pl@123</code></p>
+                  <p>The Reports & Analytics tab is protected with password security. Contact your system administrator for the access password.</p>
                 </div>
                 <p>&bull; <strong>Automatic Local Backups:</strong> The system automatically writes timestamped SQLite database backups into your configured Backup folder every time the application closes.</p>
                 <p>&bull; <strong>Cloud Uploads:</strong> Click <strong>Upload Backup on Cloud</strong> in Settings anytime to sync local database snapshots with encrypted cloud storage.</p>

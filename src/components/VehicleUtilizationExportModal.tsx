@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { toLocalYmd } from '../utils/date';
 import {
   X,
   FileDown,
@@ -46,7 +47,7 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
   initialCustomFrom = '',
   initialCustomTo = ''
 }) => {
-  const todayYmd = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayYmd = useMemo(() => toLocalYmd(), []);
 
   const [dateRange, setDateRange] = useState<DateRangeType>(initialDateRange);
   const [customFrom, setCustomFrom] = useState<string>(initialCustomFrom || todayYmd);
