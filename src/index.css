@@ -3,7 +3,28 @@
 
 @theme {
   --font-sans: 'Lato', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Brand: sky blue primary (existing), cardboard brown accent (existing) */
+  --color-brand: #4BB8FA;
+  --color-brand-hover: #35a0dc;
+  --color-brand-50: #eef8ff;
+  --color-brand-100: #d9effe;
+  --color-brand-700: #0c6aa3;
+  --color-cocoa: #5B2C06;
+  --color-cocoa-dark: #421D03;
+
+  /* Caption size — replaces ad-hoc 9px / 10px / 11px */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
 }
+
+/*
+  Design system rules
+  - Radius: controls (button, input, badge) = lg · surfaces (card, modal, panel) = xl · status pills = full
+  - Elevation: cards = shadow-xs · modals = shadow-2xl · nothing in between
+  - Weights: Lato ships 400 / 700 / 900 → normal for body, bold for UI, black for figures
+  - Casing: sentence case everywhere; uppercase only for codes (DC no, vehicle no)
+*/
 
 @layer base {
   html {
@@ -15,15 +36,137 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: #f1f5f9; /* bg-slate-100 */
-    font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    background-color: var(--color-slate-100);
+    font-family: var(--font-sans);
+    color: var(--color-slate-800);
+    -webkit-font-smoothing: antialiased;
   }
   input, select, textarea {
-    font-size: 0.9rem !important;
+    font-size: 0.875rem;
   }
   button {
-    font-size: 0.85rem !important;
+    font-size: 0.875rem;
   }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-brand-100);
+  }
+}
+
+@layer components {
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-transparent
+      text-sm font-bold leading-none whitespace-nowrap select-none cursor-pointer
+      transition-colors duration-150
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+  .btn-sm { @apply h-8 px-3 text-xs gap-1; }
+  .btn-lg { @apply h-11 px-5 text-sm; }
+  .btn-icon { @apply w-9 px-0; }
+  .btn-sm.btn-icon { @apply w-8; }
+
+  .btn-primary   { @apply bg-brand text-slate-900 hover:bg-brand-hover; }
+  .btn-secondary { @apply bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900; }
+  .btn-success   { @apply bg-emerald-600 text-white hover:bg-emerald-700; }
+  .btn-danger    { @apply bg-rose-600 text-white hover:bg-rose-700; }
+  .btn-danger-soft { @apply bg-white text-rose-600 border-slate-200 hover:bg-rose-50 hover:border-rose-200; }
+  .btn-ghost     { @apply bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-900; }
+  .btn-link      { @apply h-auto px-0 bg-transparent text-brand-700 hover:underline underline-offset-2; }
+
+  /* ---------- Forms ---------- */
+  .field-label {
+    @apply block mb-1.5 text-xs font-bold text-slate-600;
+  }
+  .field-hint {
+    @apply mt-1 text-2xs text-slate-400;
+  }
+  .input {
+    @apply block w-full h-9 px-3 rounded-lg border border-slate-300 bg-white
+      text-sm text-slate-800 placeholder:text-slate-400
+      outline-none transition-[border-color,box-shadow] duration-150
+      focus:border-brand focus:ring-3 focus:ring-brand/20
+      disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed;
+  }
+  .input:focus-visible { outline: none; }
+  textarea.input { @apply h-auto py-2 leading-relaxed; }
+  select.input { @apply pr-8 cursor-pointer; }
+  .input-sm { @apply h-8 text-xs px-2.5; }
+
+  /* ---------- Surfaces ---------- */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-xs;
+  }
+  .card-header {
+    @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-100;
+  }
+  .card-title {
+    @apply text-base font-bold text-slate-800 leading-tight;
+  }
+  .card-subtitle {
+    @apply mt-0.5 text-xs text-slate-500;
+  }
+  .card-body { @apply p-5; }
+  .panel {
+    @apply rounded-xl border border-slate-200 bg-slate-50 p-4;
+  }
+
+  /* Label/value pairs in detail views */
+  .meta-label { @apply block mb-0.5 text-2xs font-bold text-slate-400; }
+  .meta-value { @apply text-sm font-bold text-slate-700; }
+
+  /* ---------- Badges ---------- */
+  .badge {
+    @apply inline-flex items-center gap-1 h-5 px-2 rounded-full border text-2xs font-bold whitespace-nowrap leading-none;
+  }
+  .badge-neutral { @apply bg-slate-100 text-slate-600 border-slate-200; }
+  .badge-brand   { @apply bg-brand-50 text-brand-700 border-brand-100; }
+  .badge-success { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
+  .badge-warning { @apply bg-amber-50 text-amber-800 border-amber-200; }
+  .badge-danger  { @apply bg-rose-50 text-rose-700 border-rose-200; }
+  .badge-info    { @apply bg-indigo-50 text-indigo-700 border-indigo-200; }
+  .tag {
+    @apply inline-flex items-center h-5 px-1.5 rounded-md bg-slate-100 text-2xs font-bold text-slate-600 font-mono;
+  }
+
+  /* ---------- Alerts ---------- */
+  .alert { @apply flex items-start gap-3 p-4 rounded-xl border text-sm; }
+  .alert-success { @apply bg-emerald-50 border-emerald-200 text-emerald-800; }
+  .alert-danger  { @apply bg-rose-50 border-rose-200 text-rose-800; }
+  .alert-warning { @apply bg-amber-50 border-amber-200 text-amber-900; }
+  .alert-info    { @apply bg-brand-50 border-brand-100 text-slate-700; }
+
+  /* ---------- Tables ---------- */
+  .table { @apply min-w-full text-sm; }
+  .table thead { @apply bg-slate-50 border-b border-slate-200; }
+  .table th {
+    @apply px-5 py-3 text-left text-xs font-bold text-slate-500 whitespace-nowrap;
+  }
+  .table td { @apply px-5 py-3.5 text-slate-700 align-middle; }
+  .table tbody tr { @apply border-b border-slate-100 last:border-b-0 transition-colors duration-100; }
+  .table tbody tr:hover { @apply bg-slate-50/70; }
+  .table-compact th { @apply px-4 py-2.5; }
+  .table-compact td { @apply px-4 py-2.5; }
+
+  /* ---------- Segmented control ---------- */
+  .segmented { @apply inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-100 border border-slate-200; }
+  .segmented > button {
+    @apply h-7 px-3 rounded-md text-xs font-bold text-slate-500 transition-colors cursor-pointer hover:text-slate-900;
+  }
+  .segmented > button[aria-pressed="true"] { @apply bg-white text-slate-900 shadow-xs; }
+
+  /* ---------- Empty / loading ---------- */
+  .empty-state { @apply py-14 px-6 text-center text-sm text-slate-500; }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop { @apply fixed inset-0 bg-slate-900/50 backdrop-blur-xs; }
+  .modal-panel { @apply relative flex flex-col w-full bg-white rounded-xl border border-slate-200 shadow-2xl; }
+  .modal-header { @apply flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-100; }
+  .modal-title { @apply text-base font-bold text-slate-800; }
+  .modal-footer { @apply flex flex-wrap justify-end gap-2 pt-4 mt-2 border-t border-slate-100; }
 }
 
 /* Animation Keyframes for Dispatch System */

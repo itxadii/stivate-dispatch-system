@@ -540,8 +540,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
 
   if (loading) {
     return (
-      <div className="py-12 text-center text-sm text-slate-400 font-medium bg-white border border-slate-200 rounded-xl shadow-sm">
-        Loading settings...
+      <div className="card empty-state">
+        Loading settings…
       </div>
     );
   }
@@ -557,12 +557,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
 
       <div className={`grid grid-cols-1 ${isUnlocked ? 'lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
         {/* Left Form Column */}
-        <form onSubmit={handleSave} className={`${isUnlocked ? 'lg:col-span-2' : 'col-span-1'} bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6`}>
+        <form onSubmit={handleSave} className={`${isUnlocked ? 'lg:col-span-2' : 'col-span-1'} card p-5 space-y-6 min-w-0`}>
           {message && (
-            <div className={`p-4 rounded-lg border text-sm font-semibold ${message.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-              }`}>
+            <div role="status" className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
               {message.text}
             </div>
           )}
@@ -622,7 +619,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onSettingsSaved }) =
 
         {/* Right Actions Column (Locked unless administrator unlocks with i3pl@123) */}
         {isUnlocked && (
-          <div className="space-y-6 flex flex-col h-full min-h-[300px]">
+          <div className="space-y-6 min-w-0">
             <BackupOperations
               settings={settings}
               backupMsg={backupMsg}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Search, X, User } from 'lucide-react';
+import { CardHeader } from '../ui';
 
 interface PipelineFilterBarProps {
   searchQuery: string;
@@ -25,43 +26,41 @@ export const PipelineFilterBar: React.FC<PipelineFilterBarProps> = ({
   onOpenNewModal,
 }) => {
   return (
-    <div className="p-5 border-b border-slate-100 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h3 className="text-md font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
-            <span>Active Dispatch Pipeline</span>
-            <span className="text-xs px-2.5 py-0.5 bg-blue-50 text-blue-700 font-bold rounded-full border border-blue-100">
-              {filteredCount} {filteredCount === 1 ? 'Dispatch' : 'Dispatches'}
-            </span>
-          </h3>
-          <p className="text-xs text-slate-400">Manage, edit, scan, and print loading or ready shipments</p>
-        </div>
-
-        <button
-          onClick={onOpenNewModal}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#4BB8FA] hover:bg-[#35a0dc] text-slate-900 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-sm"
-        >
-          <Plus size={15} />
-          <span>Create New Dispatch</span>
-        </button>
-      </div>
+    <div className="border-b border-slate-100">
+      <CardHeader
+        className="border-b-0 pb-0"
+        title={
+          <span className="flex items-center gap-2">
+            Active dispatches
+            <span className="badge badge-brand">{filteredCount}</span>
+          </span>
+        }
+        subtitle="Trucks that are loading or ready to leave"
+        actions={
+          <button onClick={onOpenNewModal} className="btn btn-primary">
+            <Plus size={16} />
+            <span>New dispatch</span>
+          </button>
+        }
+      />
 
       {/* Search, Supervisor & Status Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
         {/* Search Input Box */}
         <div className="relative flex-1 min-w-[240px] max-w-md">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search Vehicle No, DC No, Supervisor Name, Address..."
+            placeholder="Search DC, vehicle, supervisor or address"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#4BB8FA] focus:bg-white transition-all"
+            className="input pl-9 pr-8"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200 transition-colors cursor-pointer"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 btn btn-ghost h-6 w-6 px-0 rounded-md"
+              aria-label="Clear search"
             >
               <X size={13} />
             </button>
@@ -71,14 +70,15 @@ export const PipelineFilterBar: React.FC<PipelineFilterBarProps> = ({
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Supervisor Filter Dropdown */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-            <User size={14} className="text-slate-400" />
+          <div className="relative">
+            <User size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               value={selectedSupervisor}
               onChange={(e) => setSelectedSupervisor(e.target.value)}
-              className="bg-transparent border-none text-xs focus:outline-none text-slate-700 font-bold cursor-pointer"
+              className="input w-auto pl-8"
+              aria-label="Supervisor"
             >
-              <option value="all">All Supervisors</option>
+              <option value="all">All supervisors</option>
               {supervisorList.map((sup, idx) => (
                 <option key={idx} value={sup}>{sup}</option>
               ))}
@@ -86,18 +86,10 @@ export const PipelineFilterBar: React.FC<PipelineFilterBarProps> = ({
           </div>
 
           {/* Status Filter Pills */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/80">
+          <div className="segmented" role="group" aria-label="Status">
             {(['all', 'loading', 'ready'] as const).map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 rounded-md text-xs font-bold transition-all capitalize cursor-pointer ${
-                  statusFilter === st
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                {st === 'all' ? 'All Status' : st}
+              <button key={st} onClick={() => setStatusFilter(st)} aria-pressed={statusFilter === st}>
+                {st === 'all' ? 'All' : st === 'loading' ? 'Loading' : 'Ready'}
               </button>
             ))}
           </div>
@@ -109,9 +101,10 @@ export const PipelineFilterBar: React.FC<PipelineFilterBarProps> = ({
                 setStatusFilter('all');
                 setSelectedSupervisor('all');
               }}
-              className="text-xs text-rose-600 font-bold hover:underline px-2 py-1 cursor-pointer"
+              className="btn btn-ghost btn-sm"
             >
-              Clear Filters
+              <X size={14} />
+              Clear filters
             </button>
           )}
         </div>

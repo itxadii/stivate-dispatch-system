@@ -280,19 +280,13 @@ export const DispatchPipelinePage: React.FC<DispatchPipelineProps> = ({
 
       {/* Feedback Alert Banner */}
       {feedbackMessage && (
-        <div
-          className={`p-4 rounded-xl text-sm font-semibold border ${
-            feedbackMessage.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
+        <div role="status" className={`alert ${feedbackMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
           {feedbackMessage.text}
         </div>
       )}
 
       {/* Main Pipeline Table with Search & Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="card overflow-hidden">
         <PipelineFilterBar
           filteredCount={filteredDispatches.length}
           searchQuery={searchQuery}

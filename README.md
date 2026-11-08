@@ -165,8 +165,9 @@ npx electron-builder --publish always
 
 ## 📄 Compliance & Governance Policies
 
-- **Privacy Policy:** Refer to [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for offline data handling, cloud backup, and retention details.
-- **Security Policy:** Refer to [SECURITY_POLICY.md](SECURITY_POLICY.md) for system architecture security, database protection, and incident response procedures.
+- **Privacy Policy:** Refer to [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md) for offline data handling, cloud backup, and retention details.
+- **Security Policy:** Refer to [docs/SECURITY_POLICY.md](docs/SECURITY_POLICY.md) for system architecture security, database protection, and incident response procedures.
+- **Multi-warehouse online plan:** See [docs/MULTI_WAREHOUSE_ONLINE_PLAN.md](docs/MULTI_WAREHOUSE_ONLINE_PLAN.md) for the roadmap to a central Neon database, consolidated reporting and a management web dashboard.
 
 ---
 

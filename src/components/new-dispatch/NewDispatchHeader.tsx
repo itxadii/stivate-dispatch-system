@@ -34,53 +34,55 @@ export const NewDispatchHeader: React.FC<NewDispatchHeaderProps> = ({
   onOpenConfirmComplete,
 }) => {
   return (
-    <div className="flex items-center justify-between bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm">
+    <div className="card px-5 py-4 flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-3">
         {editId && (
           <button
             onClick={onCancel}
-            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 cursor-pointer"
+            className="btn btn-ghost btn-icon"
+            aria-label="Back"
+            title="Back"
           >
             <ArrowLeft size={16} />
           </button>
         )}
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-md font-bold text-slate-800 uppercase tracking-wide">
+            <h3 className="card-title">
               {editId
                 ? (dispatch.status === 'completed'
-                    ? `Edit Completed Dispatch: ${dispatch.dc_no}`
-                    : `Loading Dispatch: ${dispatch.dc_no}`)
-                : 'New Dispatch Invoice'}
+                    ? `Edit completed dispatch ${dispatch.dc_no}`
+                    : `Dispatch ${dispatch.dc_no}`)
+                : 'New dispatch'}
             </h3>
             {editId && dispatch.status === 'completed' && (
-              <span className="px-2 py-0.5 text-[10px] font-black uppercase rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Completed (Editable)
+              <span className="badge badge-success">
+                Completed, editable
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400">Enter or paste Pull List Numbers or Email Subject lines</p>
+          <p className="card-subtitle">Scan or paste pull list numbers, or an email subject line</p>
         </div>
       </div>
 
       {/* Action Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Save Changes Button */}
         <button
           onClick={onSave}
           disabled={loading || !dispatch.vehicle_no || !dispatch.supplier_name}
-          className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors shadow-2xs disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Save changes to this dispatch (Ctrl+S)"
+          className={`btn ${dispatch.id && (dispatch.status === 'loading' || dispatch.status === 'ready') ? 'btn-secondary' : 'btn-primary'}`}
+          title="Save changes (Ctrl+S)"
         >
-          <Check size={14} className="stroke-[3]" />
-          <span>Save Changes</span>
+          <Check size={14} strokeWidth={3} />
+          <span>Save</span>
         </button>
 
         {/* Unified Print Set Button */}
         <button
           onClick={onPrintCombined}
           disabled={loading || items.length === 0}
-          className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+          className="btn btn-secondary"
           title={
             items.length > 15
               ? `Prints 3 Challans and ${Math.ceil(items.length / 15) * 3} Barcodes (${3 + Math.ceil(items.length / 15) * 3} pages in total) in 1 click`
@@ -88,42 +90,38 @@ export const NewDispatchHeader: React.FC<NewDispatchHeaderProps> = ({
           }
         >
           <Printer size={14} />
-          <span>
-            {items.length > 15
-              ? `Print Set (3x Challan + ${Math.ceil(items.length / 15) * 3}x Barcodes)`
-              : 'Print Set (3x Challan + 3x Barcodes)'}
-          </span>
+          <span>Print set</span>
         </button>
 
         {/* Print Barcodes Button */}
         <button
           onClick={onPrintBarcodes}
           disabled={loading || items.length === 0}
-          className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+          className="btn btn-secondary"
         >
           <Barcode size={14} />
-          <span>Print Barcodes</span>
+          <span>Barcodes</span>
         </button>
 
         {/* Print Challan Button */}
         <button
           onClick={onPrintChallan}
           disabled={loading || !dispatch.dc_no}
-          className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+          className="btn btn-secondary"
         >
           <FileText size={14} />
-          <span>Print Challan</span>
+          <span>Challan</span>
         </button>
 
         {/* Mark Ready Action (if status is loading) */}
         {dispatch.id && dispatch.status === 'loading' && (
           <AnimatedStatusButton
             status={markReadyStatus}
-            idleText="Mark Ready"
-            loadingText="Marking Ready..."
-            successText="✓ Ready"
+            idleText="Mark ready"
+            loadingText="Marking ready…"
+            successText="Ready"
             idleIcon={Play}
-            variant="amber"
+            variant="primary"
             onClick={onMarkReady}
             disabled={loading}
           />
@@ -134,10 +132,10 @@ export const NewDispatchHeader: React.FC<NewDispatchHeaderProps> = ({
           <button
             onClick={onOpenConfirmComplete}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+            className="btn btn-primary"
           >
             <CheckCircle size={14} />
-            <span>Complete Dispatch</span>
+            <span>Complete dispatch</span>
           </button>
         )}
       </div>

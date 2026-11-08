@@ -36,9 +36,9 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
   }, []);
 
   return (
-    <div className="relative flex items-center w-full max-w-md">
-      <div className="absolute left-3.5 text-slate-400 pointer-events-none">
-        <Search size={16} />
+    <div className="relative flex items-center w-full sm:w-72">
+      <div className="absolute left-3 text-slate-400 pointer-events-none">
+        <Search size={15} />
       </div>
       <input
         ref={inputRef}
@@ -46,7 +46,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 placeholder-slate-400 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-100"
+        className="input pl-9 pr-9"
       />
       {value && (
         <button
@@ -54,7 +54,8 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
             onChange('');
             inputRef.current?.focus();
           }}
-          className="absolute right-3 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 cursor-pointer"
+          className="absolute right-1.5 btn btn-ghost h-6 w-6 px-0 rounded-md"
+          aria-label="Clear search"
         >
           <X size={14} />
         </button>

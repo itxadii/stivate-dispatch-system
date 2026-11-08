@@ -12,122 +12,125 @@ export const CompanyAndPrinterSettings: React.FC<CompanyAndPrinterSettingsProps>
   onChange,
 }) => {
   return (
-    <>
-      <h3 className="text-md font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-        <Sparkles size={16} className="text-emerald-500" />
-        Company Profile & Printer Setup
-      </h3>
+    <section className="space-y-4">
+      <div>
+        <h3 className="card-title flex items-center gap-2">
+          <Sparkles size={16} className="text-brand-700" />
+          Company and printers
+        </h3>
+        <p className="card-subtitle">Printed on every challan and barcode sheet</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase">Company Name</label>
+        <div className="md:col-span-2">
+          <label className="field-label">Company name</label>
           <input
             type="text"
             name="companyName"
             value={settings.companyName}
             onChange={onChange}
             required
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            className="input"
           />
         </div>
 
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase">Company Address</label>
+        <div className="md:col-span-2">
+          <label className="field-label">Company address</label>
           <textarea
             name="address"
             value={settings.address}
             onChange={onChange}
             rows={2}
             required
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            className="input"
           />
         </div>
 
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase">Warehouse Location / Header Prefix</label>
+        <div className="md:col-span-2">
+          <label className="field-label">Warehouse location / header prefix</label>
           <input
             type="text"
             name="warehouseLocation"
             value={settings.warehouseLocation || ''}
             onChange={onChange}
-            placeholder="e.g. F W H or FORWARD WAREHOUSE or MAIN WAREHOUSE"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-[#4BB8FA] focus:bg-white transition-colors font-medium"
+            placeholder="e.g. F W H, FORWARD WAREHOUSE"
+            className="input"
           />
-          <p className="text-[11px] text-slate-400">
-            Sets the location prefix printed on Challan PDF headers (e.g. <strong>{settings.warehouseLocation || 'F W H'}</strong> TO [Consignee Name]).
+          <p className="field-hint">
+            Printed at the top of challans, e.g. <strong>{settings.warehouseLocation || 'F W H'}</strong> TO [consignee name]
           </p>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-500 uppercase">Default Document Printer</label>
+        <div>
+          <label className="field-label">Default document printer</label>
           <input
             type="text"
             name="printer"
             value={settings.printer}
             onChange={onChange}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            className="input"
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-500 uppercase">Default Barcode Printer</label>
+        <div>
+          <label className="field-label">Default barcode printer</label>
           <input
             type="text"
             name="barcodePrinter"
             value={settings.barcodePrinter}
             onChange={onChange}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            className="input"
           />
         </div>
 
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
+        <div className="md:col-span-2">
+          <label className="field-label flex items-center gap-1.5">
             <Database size={13} className="text-slate-400" />
-            Database Storage Location
+            Database location
           </label>
           <input
             type="text"
             name="databaseLocation"
             value={settings.databaseLocation}
             readOnly
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-500 font-mono text-[11px] cursor-not-allowed"
+            className="input font-mono text-xs cursor-not-allowed bg-slate-50 text-slate-500"
             title="Managed automatically for security"
           />
-          <p className="text-[10px] text-slate-400">Automatically managed in application data folder for security</p>
+          <p className="field-hint">Managed by the app</p>
         </div>
 
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
+        <div className="md:col-span-2">
+          <label className="field-label flex items-center gap-1.5">
             <FolderOpen size={13} className="text-slate-400" />
-            Automatic Backup Folder
+            Backup folder
           </label>
           <input
             type="text"
             name="backupFolder"
             value={settings.backupFolder}
             readOnly
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-500 font-mono text-[11px] cursor-not-allowed"
+            className="input font-mono text-xs cursor-not-allowed bg-slate-50 text-slate-500"
             title="Managed automatically for security"
           />
-          <p className="text-[10px] text-slate-400">Automatically managed in application data folder for security</p>
+          <p className="field-hint">Managed by the app</p>
         </div>
 
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">
+        <div className="md:col-span-2">
+          <label className="field-label flex items-center gap-1.5">
             <FolderOpen size={13} className="text-slate-400" />
-            Prints/PDF Saving Folder
+            PDF output folder
           </label>
           <input
             type="text"
             name="printsFolder"
             value={settings.printsFolder}
             readOnly
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-500 font-mono text-[11px] cursor-not-allowed"
+            className="input font-mono text-xs cursor-not-allowed bg-slate-50 text-slate-500"
             title="Managed automatically for security"
           />
-          <p className="text-[10px] text-slate-400">Automatically managed in application data folder for security</p>
+          <p className="field-hint">Managed by the app</p>
         </div>
       </div>
-    </>
+    </section>
   );
 };

@@ -46,16 +46,16 @@ export const DispatchCompleteAnimation: React.FC<DispatchCompleteAnimationProps>
 
         {/* Text Confirmation */}
         <div className="space-y-2 text-white">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm uppercase">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-xs uppercase">
             Dispatch Completed
           </h2>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-700/60 border border-emerald-400/40 backdrop-blur-xs shadow-inner">
             <Truck size={16} className="text-emerald-200" />
-            <span className="font-mono text-sm font-extrabold text-white tracking-wide">
+            <span className="font-mono text-sm font-black text-white tracking-wide">
               {dispatchNumber || 'DC-COMPLETED'}
             </span>
           </div>
-          <p className="text-xs font-semibold text-emerald-100/90 pt-1 tracking-wide">
+          <p className="text-xs font-bold text-emerald-100/90 pt-1 tracking-wide">
             Finalized & Archived in Completed Logs
           </p>
         </div>

@@ -713,28 +713,22 @@ export const NewDispatchPage: React.FC<NewDispatchProps> = ({
       />
 
       {saveStatus && (
-        <div className={`p-4 rounded-xl text-sm font-semibold border ${
-          saveStatus.type === 'success'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            : 'bg-rose-50 text-rose-800 border-rose-200'
-        }`}>
+        <div role="status" className={`alert ${saveStatus.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
           {saveStatus.text}
         </div>
       )}
 
       {/* Main Form Fields Grid */}
-      <div className="flex gap-6 items-start">
+      <div className="flex gap-4 items-start">
         {/* Left Toggle Sidebar Trigger */}
-        <div className="flex flex-col gap-2 items-center bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm shrink-0">
+        <div className="shrink-0">
           <button
             type="button"
             onClick={() => setShowLogistics(!showLogistics)}
-            className={`p-2 rounded-lg transition-all cursor-pointer border ${
-              showLogistics
-                ? 'bg-[#4BB8FA]/10 text-[#4BB8FA] border-[#4BB8FA]/20'
-                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-700'
-            }`}
-            title="Toggle Dispatch Logistics Panel"
+            aria-pressed={showLogistics}
+            className={`btn btn-icon ${showLogistics ? 'bg-brand-50 text-brand-700 border-brand-100 hover:bg-brand-100' : 'btn-secondary'}`}
+            title={showLogistics ? 'Hide dispatch details' : 'Show dispatch details'}
+            aria-label="Toggle dispatch details"
           >
             <Sliders size={18} />
           </button>

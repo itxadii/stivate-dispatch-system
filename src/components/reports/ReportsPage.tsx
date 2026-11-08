@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { databaseService, settingsService } from '../../services/ipc';
+import { CardHeader } from '../ui';
 import { BarChart3 } from 'lucide-react';
 import { ReportsUnlockGate } from './ReportsUnlockGate';
 import { ReportControls } from './ReportControls';
@@ -83,25 +84,21 @@ export const ReportsPage: React.FC = () => {
       />
 
       {/* Report Table Card */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-            <BarChart3 size={16} className="text-emerald-600" />
-            <span>{reportType === 'loading-summary' ? 'Loading Summary Report' : 'Report Summary'}</span>
-          </h4>
-          <span className="text-xs text-slate-400 font-semibold uppercase">
-            {reportData.length} records found
-          </span>
-        </div>
+      <div className="card overflow-hidden">
+        <CardHeader
+          icon={BarChart3}
+          title={reportType === 'loading-summary' ? 'Loading summary' : 'Report'}
+          actions={<span className="badge badge-neutral">{reportData.length} {reportData.length === 1 ? 'row' : 'rows'}</span>}
+        />
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="py-12 text-center text-sm text-slate-400 font-medium">
-              Calculating analytics...
+            <div className="empty-state">
+              Building report…
             </div>
           ) : reportData.length === 0 ? (
-            <div className="py-12 text-center text-sm text-slate-400 font-medium">
-              No dispatch data found for the selected criteria.
+            <div className="empty-state">
+              No dispatches in this date range. Try widening the dates.
             </div>
           ) : reportType === 'loading-summary' ? (
             <LoadingSummaryTable

@@ -294,11 +294,7 @@ export const DispatchHistoryPage: React.FC<DispatchHistoryProps> = ({ onEditDisp
       />
 
       {message && (
-        <div className={`p-4 rounded-xl text-sm font-semibold border ${
-          message.type === 'success'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            : 'bg-rose-50 text-rose-800 border-rose-200'
-        }`}>
+        <div role="status" className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
           {message.text}
         </div>
       )}

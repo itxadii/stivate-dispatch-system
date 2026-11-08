@@ -1,5 +1,6 @@
 import React from 'react';
 import { Lock, Unlock, Key } from 'lucide-react';
+import { CardHeader } from '../ui';
 
 interface SettingsHeaderProps {
   isUnlocked: boolean;
@@ -13,50 +14,38 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
   onUnlockClick,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-      <div>
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-xl font-black text-slate-800 tracking-tight">
-            {isUnlocked ? 'System Settings & Logistics Master' : 'Logistics Dropdown Options'}
-          </h2>
-          {isUnlocked ? (
-            <span className="text-[11px] px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold flex items-center gap-1">
-              <Unlock size={12} /> Admin Unlocked
-            </span>
+    <div className="card">
+      <CardHeader
+        className="border-b-0"
+        title={
+          <span className="flex items-center gap-2">
+            {isUnlocked ? 'Admin access' : 'Limited access'}
+            {isUnlocked ? (
+              <span className="badge badge-success"><Unlock size={11} /> Admin</span>
+            ) : (
+              <span className="badge badge-neutral"><Lock size={11} /> Locked</span>
+            )}
+          </span>
+        }
+        subtitle={
+          isUnlocked
+            ? 'Company details, printers, report emails, backups and updates are unlocked.'
+            : 'Edit the dropdown lists used on dispatches. Unlock to change company, printer and backup settings.'
+        }
+        actions={
+          isUnlocked ? (
+            <button type="button" onClick={onLock} className="btn btn-secondary">
+              <Lock size={14} />
+              <span>Lock</span>
+            </button>
           ) : (
-            <span className="text-[11px] px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-bold flex items-center gap-1">
-              <Lock size={12} /> Protected Mode
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-slate-500 mt-1">
-          {isUnlocked
-            ? 'Full administrator mode active. Company details, printers, database backups, and updates are unlocked.'
-            : 'Customize dropdown lists for consignee addresses, supervisors, scanning operators, verifiers, and vehicle masters.'}
-        </p>
-      </div>
-
-      <div>
-        {isUnlocked ? (
-          <button
-            type="button"
-            onClick={onLock}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-300 shadow-sm"
-          >
-            <Lock size={13} />
-            <span>Lock Advanced Settings</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onUnlockClick}
-            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
-          >
-            <Key size={13} className="text-amber-400" />
-            <span>Unlock All Settings</span>
-          </button>
-        )}
-      </div>
+            <button type="button" onClick={onUnlockClick} className="btn btn-primary">
+              <Key size={14} />
+              <span>Unlock all settings</span>
+            </button>
+          )
+        }
+      />
     </div>
   );
 };

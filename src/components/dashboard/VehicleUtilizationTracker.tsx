@@ -3,6 +3,7 @@ import { Truck, FileDown, Calendar, Search, X, ChevronDown, Check, Eye } from 'l
 import type { Dispatch } from '../../types';
 import { getVehicleMaxPallets } from '../../types';
 import type { DateRangeType } from '../VehicleUtilizationExportModal';
+import { StatusBadge, CardHeader } from '../ui';
 
 interface VehicleUtilizationTrackerProps {
   trackerDateRange: DateRangeType;
@@ -127,56 +128,46 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
-      {/* Header Bar */}
-      <div className="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="space-y-1">
-          <h4 className="text-base font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-            <span className="p-2 bg-amber-50 text-amber-600 rounded-lg border border-amber-200/80">
-              <Truck size={18} />
-            </span>
-            <span>Truck Capacity & Fleet Utilization Tracker</span>
-          </h4>
-          <p className="text-xs text-slate-500 font-medium">
-            Monitor vehicle load capacities, filter dispatches by date range, search trucks, and export utilization reports.
-          </p>
-        </div>
-
-        {/* Date Filter & Export PDF Button */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="relative flex items-center">
+    <div className="card">
+      <CardHeader
+        icon={Truck}
+        title="Fleet utilization"
+        subtitle="Pallet load against truck capacity. Filter by period or vehicle, and export as PDF."
+        actions={
+          <>
             <select
               value={trackerDateRange}
               onChange={(e) => setTrackerDateRange(e.target.value as DateRangeType)}
-              className="px-3 py-2 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-hidden cursor-pointer"
-              title="Filter vehicle utilization by date range"
+              className="input input-sm w-auto"
+              aria-label="Date range"
             >
-              <option value="all">All Time</option>
-              <option value="7days">Past 7 Days</option>
-              <option value="30days">Past 30 Days</option>
-              <option value="3months">Past 3 Months</option>
-              <option value="6months">Past 6 Months</option>
-              <option value="1year">Past Year</option>
-              <option value="thisMonth">This Month</option>
-              <option value="thisYear">This Year</option>
-              <option value="custom">Custom Range...</option>
+              <option value="all">All time</option>
+              <option value="7days">Past 7 days</option>
+              <option value="30days">Past 30 days</option>
+              <option value="3months">Past 3 months</option>
+              <option value="6months">Past 6 months</option>
+              <option value="1year">Past year</option>
+              <option value="thisMonth">This month</option>
+              <option value="thisYear">This year</option>
+              <option value="custom">Custom range…</option>
             </select>
-          </div>
 
           {trackerDateRange === 'custom' && (
-            <div className="flex items-center gap-1.5 text-xs font-mono bg-slate-50 p-1 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1.5">
               <input
                 type="date"
                 value={trackerCustomFrom}
                 onChange={(e) => setTrackerCustomFrom(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white"
+                className="input input-sm w-auto"
+                aria-label="From date"
               />
-              <span className="text-slate-400 font-sans">to</span>
+              <span className="text-xs text-slate-400">to</span>
               <input
                 type="date"
                 value={trackerCustomTo}
                 onChange={(e) => setTrackerCustomTo(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white"
+                className="input input-sm w-auto"
+                aria-label="To date"
               />
             </div>
           )}
@@ -184,28 +175,27 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
           <button
             type="button"
             onClick={onOpenExportModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0"
+            className="btn btn-secondary btn-sm"
             title="Export complete fleet or filtered vehicle utilization report to PDF"
           >
-            <FileDown size={15} />
+            <FileDown size={14} />
             <span>Export PDF</span>
           </button>
-        </div>
-      </div>
+          </>
+        }
+      />
+
+      <div className="card-body space-y-4">
 
       {/* Date Filter Active Pill */}
       {trackerDateRange !== 'all' && (
-        <div className="px-3 py-1.5 bg-blue-50/80 border border-blue-200 rounded-lg flex items-center justify-between text-xs">
-          <span className="text-blue-900 font-semibold flex items-center gap-1.5">
-            <Calendar size={13} className="text-blue-600" />
-            <span>Filtered by period: <strong>{trackerDateBoundaries.label}</strong> ({trackerDispatchesList.length} dispatches in range)</span>
+        <div className="alert alert-info py-2.5 items-center justify-between text-xs">
+          <span className="flex items-center gap-2">
+            <Calendar size={14} className="text-brand-700 shrink-0" />
+            <span>Showing <strong>{trackerDateBoundaries.label}</strong>, {trackerDispatchesList.length} dispatches in range</span>
           </span>
-          <button
-            type="button"
-            onClick={() => setTrackerDateRange('all')}
-            className="text-[11px] font-bold text-blue-700 hover:underline cursor-pointer"
-          >
-            Reset to All Time
+          <button type="button" onClick={() => setTrackerDateRange('all')} className="btn btn-link text-xs">
+            Show all time
           </button>
         </div>
       )}
@@ -216,10 +206,10 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
           {/* Searchable Combobox Container */}
           <div ref={truckComboboxRef} className="relative flex-1">
             <div className="relative">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search by truck number or select from 1,000+ fleet vehicles (e.g. MH-12, 1234)..."
+                placeholder="Search or pick a vehicle number, e.g. MH12 or 1234"
                 value={truckSearchQuery}
                 onFocus={() => {
                   setIsTruckDropdownOpen(true);
@@ -255,7 +245,7 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                     setIsTruckDropdownOpen(false);
                   }
                 }}
-                className="w-full pl-10 pr-24 py-2.5 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:border-[#4BB8FA] focus:bg-white font-mono font-bold uppercase text-slate-800 placeholder-slate-400 transition-all shadow-2xs"
+                className="input pl-9 pr-20 font-mono uppercase placeholder:normal-case placeholder:font-sans"
               />
 
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -263,7 +253,7 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                   <button
                     type="button"
                     onClick={clearTruckSelection}
-                    className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                    className="btn btn-ghost h-6 w-6 px-0 rounded-md"
                     title="Clear search"
                   >
                     <X size={14} />
@@ -272,7 +262,7 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                 <button
                   type="button"
                   onClick={() => setIsTruckDropdownOpen((prev) => !prev)}
-                  className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                  className="btn btn-ghost h-6 w-6 px-0 rounded-md"
                   title="Toggle vehicle dropdown"
                 >
                   <ChevronDown size={14} className={`transition-transform duration-200 ${isTruckDropdownOpen ? 'rotate-180' : ''}`} />
@@ -282,29 +272,29 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
 
             {/* Floating Suggestions Dropdown */}
             {isTruckDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="p-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <span>{matchingTrucks.length} Vehicle{matchingTrucks.length === 1 ? '' : 's'} Available</span>
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-2xs font-bold text-slate-500">
+                  <span>{matchingTrucks.length} vehicle{matchingTrucks.length === 1 ? '' : 's'}</span>
                   <button
                     type="button"
                     onClick={clearTruckSelection}
-                    className="text-[10px] text-blue-600 hover:underline cursor-pointer lowercase font-sans font-semibold"
+                    className="btn btn-link text-2xs"
                   >
-                    Reset to all vehicles
+                    Show all vehicles
                   </button>
                 </div>
 
-                <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                <div className="max-h-64 overflow-y-auto divide-y divide-slate-100">
                   <button
                     type="button"
                     onClick={clearTruckSelection}
-                    className={`w-full px-3.5 py-2.5 text-left text-xs font-bold flex items-center justify-between hover:bg-blue-50/60 transition-colors cursor-pointer ${selectedTruckNumber === 'all' ? 'bg-blue-50 text-blue-800' : 'text-slate-700'}`}
+                    className={`w-full px-3.5 py-2.5 text-left text-xs font-bold flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer ${selectedTruckNumber === 'all' ? 'bg-brand-50 text-slate-900' : 'text-slate-700'}`}
                   >
                     <div className="flex items-center gap-2">
                       <Truck size={14} className="text-slate-400" />
-                      <span>All Vehicles (Fleet Overview)</span>
+                      <span>All vehicles</span>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400 font-semibold">{allTrucksList.length} total</span>
+                    <span className="text-2xs font-mono text-slate-400 font-bold">{allTrucksList.length} total</span>
                   </button>
 
                   {matchingTrucks.slice(0, 40).map((truck, idx) => {
@@ -320,46 +310,46 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                         onMouseEnter={() => setHighlightedTruckIndex(idx)}
                         className={`w-full px-3.5 py-2 text-left text-xs transition-colors cursor-pointer flex items-center justify-between ${
                           isSelected
-                            ? 'bg-blue-50 text-blue-900 font-bold'
+                            ? 'bg-brand-50 text-slate-900 font-bold'
                             : isHighlighted
-                            ? 'bg-slate-100/80 text-slate-900'
+                            ? 'bg-slate-100 text-slate-900'
                             : 'hover:bg-slate-50 text-slate-700'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="font-mono font-black text-slate-800 text-xs tracking-wider uppercase">
+                          <span className="font-mono font-bold text-slate-800 text-xs uppercase">
                             {truck.vehicleNo}
                           </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
-                            {truck.vehicleSize || '32 ft'} ({maxP} Pallets)
+                          <span className="tag shrink-0">
+                            {truck.vehicleSize || '32 ft'} · {maxP} pallets
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0 ml-3">
                           {truck.activeDispatches > 0 && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                              {truck.activeDispatches} Active
+                            <span className="badge badge-warning">
+                              {truck.activeDispatches} active
                             </span>
                           )}
-                          <span className="text-[10px] font-mono font-semibold text-slate-400">
+                          <span className="text-2xs font-bold text-slate-400 tabular-nums">
                             {truck.totalDispatches} DC{truck.totalDispatches === 1 ? '' : 's'}
                           </span>
-                          {isSelected && <Check size={13} className="text-blue-600" />}
+                          {isSelected && <Check size={14} className="text-brand-700" />}
                         </div>
                       </button>
                     );
                   })}
 
                   {matchingTrucks.length === 0 && (
-                    <div className="p-4 text-center text-xs text-slate-400 font-semibold">
-                      No matching vehicles found for "{truckSearchQuery}"
+                    <div className="p-4 text-center text-xs text-slate-500">
+                      No vehicle matches "{truckSearchQuery}"
                     </div>
                   )}
                 </div>
 
                 {matchingTrucks.length > 40 && (
-                  <div className="p-2 bg-slate-50 border-t border-slate-100 text-center text-[10px] font-semibold text-slate-400 font-sans">
-                    Showing top 40 of {matchingTrucks.length} matching vehicles. Type to refine search.
+                  <div className="px-3 py-2 bg-slate-50 border-t border-slate-100 text-center text-2xs text-slate-500">
+                    Showing 40 of {matchingTrucks.length}. Keep typing to narrow down.
                   </div>
                 )}
               </div>
@@ -370,30 +360,27 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
           <button
             type="button"
             onClick={clearTruckSelection}
-            className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer border ${
-              selectedTruckNumber === 'all'
-                ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-            }`}
+            aria-pressed={selectedTruckNumber === 'all'}
+            className={`btn shrink-0 ${selectedTruckNumber === 'all' ? 'bg-brand-50 text-brand-700 border-brand-100 hover:bg-brand-100' : 'btn-secondary'}`}
           >
-            <Truck size={14} className={selectedTruckNumber === 'all' ? 'text-[#4BB8FA]' : 'text-slate-400'} />
-            <span>All Vehicles ({allTrucksList.length})</span>
+            <Truck size={14} />
+            <span>All vehicles ({allTrucksList.length})</span>
           </button>
         </div>
 
         {/* Active Selected Truck Banner */}
         {selectedTruckNumber !== 'all' && (
-          <div className="flex items-center justify-between bg-blue-50/80 border border-blue-200 rounded-xl px-3.5 py-2 text-xs">
+          <div className="alert alert-info py-2 items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 font-medium">Currently viewing vehicle:</span>
-              <span className="font-mono font-extrabold text-blue-900 bg-white px-2 py-0.5 rounded border border-blue-200 text-xs">
+              <span className="text-slate-500">Viewing vehicle</span>
+              <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-brand-100 text-xs uppercase">
                 {selectedTruckNumber}
               </span>
             </div>
             <button
               type="button"
               onClick={clearTruckSelection}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 hover:underline cursor-pointer"
+              className="btn btn-link text-xs"
             >
               <X size={13} />
               <span>Clear selection</span>
@@ -441,67 +428,61 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
             const isHigh = rawTruckUtilPct >= 80;
 
             return (
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4 shadow-2xs">
+              <div className="panel space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-3 border-b border-slate-200/80 pb-3">
                   <div className="flex items-center gap-3">
-                    <span className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-mono font-black uppercase tracking-wider flex items-center gap-2">
-                      <Truck size={14} className="text-[#4BB8FA]" />
-                      <span>Truck: {targetTruckNo}</span>
+                    <span className="inline-flex items-center gap-2 h-8 px-3 bg-white border border-slate-200 rounded-lg text-sm font-mono font-bold text-slate-900 uppercase">
+                      <Truck size={15} className="text-brand-700" />
+                      <span>{targetTruckNo}</span>
                     </span>
-                    <span className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-bold">
-                      Vehicle Size: {vSize} ({singleTruckCap} Pallets Capacity)
+                    <span className="text-xs text-slate-500">
+                      {vSize} truck, {singleTruckCap} pallet capacity
                     </span>
                   </div>
 
-                  <span className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border ${
-                    isOver
-                      ? 'bg-rose-50 text-rose-800 border-rose-200'
-                      : isHigh
-                      ? 'bg-amber-50 text-amber-800 border-amber-200'
-                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  }`}>
-                    {formattedTruckUtilPct}% Capacity Utilized ({totalTruckPallets.toLocaleString()} / {totalAvailableCapacity.toLocaleString()} Pallets)
+                  <span className={`badge h-6 px-2.5 text-xs ${isOver ? 'badge-danger' : isHigh ? 'badge-warning' : 'badge-success'}`}>
+                    {formattedTruckUtilPct}% utilized · {totalTruckPallets.toLocaleString()}/{totalAvailableCapacity.toLocaleString()} pallets
                   </span>
                 </div>
 
                 {/* Stat Tiles */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Assigned Dispatches</span>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200">
+                    <span className="meta-label">Dispatches</span>
                     <div className="flex items-baseline gap-1.5 flex-wrap">
-                      <span className="text-lg font-extrabold font-mono text-slate-800">{dcCount} DCs</span>
+                      <span className="text-lg font-black text-slate-800 tabular-nums">{dcCount} DCs</span>
                       {activeDispatches.length > 0 && (
-                        <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                          {activeDispatches.length} Active
+                        <span className="badge badge-warning">
+                          {activeDispatches.length} active
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Loaded Pallets</span>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200">
+                    <span className="meta-label">Pallets loaded</span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-extrabold font-mono text-slate-800">{totalTruckPallets.toLocaleString()} Pallets</span>
+                      <span className="text-lg font-black text-slate-800 tabular-nums">{totalTruckPallets.toLocaleString()}</span>
                       {emptyPallets > 0 && (
-                        <span className="text-[10px] font-semibold text-slate-400">
-                          ({cargoPallets.toLocaleString()} Cargo + {emptyPallets.toLocaleString()} Return)
+                        <span className="text-2xs font-bold text-slate-400">
+                          {cargoPallets.toLocaleString()} cargo + {emptyPallets.toLocaleString()} return
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Available Capacity</span>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200">
+                    <span className="meta-label">Available capacity</span>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-extrabold font-mono text-slate-800">{totalAvailableCapacity.toLocaleString()} Pallets</span>
+                      <span className="text-lg font-black text-slate-800 tabular-nums">{totalAvailableCapacity.toLocaleString()}</span>
                       {dcCount > 1 && (
-                        <span className="text-[10px] font-semibold text-slate-400">
+                        <span className="text-2xs font-bold text-slate-400">
                           ({singleTruckCap} P/DC × {dcCount})
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Capacity Load %</span>
-                    <span className={`text-lg font-extrabold font-mono ${isOver ? 'text-rose-600' : isHigh ? 'text-amber-600' : 'text-emerald-700'}`}>
+                  <div className="p-3 bg-white rounded-lg border border-slate-200">
+                    <span className="meta-label">Load</span>
+                    <span className={`text-lg font-black tabular-nums ${isOver ? 'text-rose-600' : isHigh ? 'text-amber-600' : 'text-emerald-700'}`}>
                       {formattedTruckUtilPct}%
                     </span>
                   </div>
@@ -510,71 +491,55 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                 {/* Dispatches Table under this Truck (Showing recent 5 DCs) */}
                 {recent5TruckDispatches.length > 0 ? (
                   <div className="space-y-2 pt-1">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase px-1">
-                      <span>Recent Dispatches {allTruckDispatches.length > 5 ? `(Showing 5 of ${allTruckDispatches.length})` : `(${allTruckDispatches.length})`}</span>
+                    <div className="flex items-center justify-between text-sm font-bold text-slate-800">
+                      <span>Recent dispatches <span className="text-slate-400 font-normal">{allTruckDispatches.length > 5 ? `(5 of ${allTruckDispatches.length})` : `(${allTruckDispatches.length})`}</span></span>
                     </div>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-xl overflow-hidden bg-white">
-                        <thead className="bg-slate-100/80">
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                      <table className="table table-compact">
+                        <thead>
                           <tr>
-                            <th className="px-4 py-2.5 text-left text-xs font-bold text-slate-500 uppercase font-mono">DC Number</th>
-                            <th className="px-4 py-2.5 text-left text-xs font-bold text-slate-500 uppercase">Date & Time</th>
-                            <th className="px-4 py-2.5 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
-                            <th className="px-4 py-2.5 text-left text-xs font-bold text-slate-500 uppercase">Supervisor</th>
-                            <th className="px-4 py-2.5 text-center text-xs font-bold text-slate-500 uppercase">Loaded Pallets</th>
-                            <th className="px-4 py-2.5 text-center text-xs font-bold text-slate-500 uppercase">DC Load Ratio</th>
-                            <th className="px-4 py-2.5 text-center text-xs font-bold text-slate-500 uppercase">Action</th>
+                            <th>DC number</th>
+                            <th>Date &amp; time</th>
+                            <th>Status</th>
+                            <th>Supervisor</th>
+                            <th className="text-right!">Pallets</th>
+                            <th>Truck load</th>
+                            <th className="text-right!">Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody>
                           {recent5TruckDispatches.map((d: any) => {
                             const pCount = Number(d.total_pallets) || 1;
                             const dcCap = getVehicleMaxPallets(d.vehicle_size || vSize);
                             const dcRawPct = (pCount / dcCap) * 100;
                             const dcUtilPct = dcRawPct % 1 === 0 ? dcRawPct.toFixed(0) : dcRawPct.toFixed(2);
                             return (
-                              <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-4 py-3 font-mono font-bold text-slate-800 text-xs">
+                              <tr key={d.id}>
+                                <td className="font-mono font-bold text-slate-900 whitespace-nowrap">
                                   <div className="flex items-center gap-1.5">
                                     <span>{d.dc_no}</span>
                                     {Boolean(d.is_empty_pallets) && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
-                                        Empty
-                                      </span>
+                                      <span className="badge badge-warning font-sans">Empty</span>
                                     )}
                                   </div>
                                 </td>
-                                <td className="px-4 py-3 text-xs text-slate-600 font-medium">{formatDateTimeDisplay(d.date)}</td>
-                                <td className="px-4 py-3 text-xs">
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                                    d.status === 'completed'
-                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                      : d.status === 'ready'
-                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                      : 'bg-amber-50 text-amber-700 border-amber-200'
-                                  }`}>
-                                    {d.status ? d.status.toUpperCase() : 'LOADING'}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-3 text-xs text-slate-700 font-bold uppercase">{d.supplier_name}</td>
-                                <td className="px-4 py-3 text-xs font-mono font-bold text-center text-slate-800">{pCount} Pallet{pCount > 1 ? 's' : ''}</td>
-                                <td className="px-4 py-3 text-center">
+                                <td className="text-slate-600 whitespace-nowrap">{formatDateTimeDisplay(d.date)}</td>
+                                <td><StatusBadge status={d.status} /></td>
+                                <td className="text-slate-600">{d.supplier_name}</td>
+                                <td className="text-right font-mono font-bold text-slate-800 tabular-nums">{pCount}</td>
+                                <td>
                                   {d.is_empty_pallets ? (
-                                    <span className="px-2.5 py-1 text-xs font-bold rounded-md bg-amber-50 text-amber-700 border border-amber-200">
-                                      Empty Return ({pCount} Pallet{pCount > 1 ? 's' : ''})
-                                    </span>
+                                    <span className="badge badge-warning">Empty return</span>
                                   ) : (
-                                    <span className={`px-2.5 py-1 text-xs font-extrabold rounded-md border ${
-                                      dcRawPct > 100 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                    }`}>
-                                      {dcUtilPct}% of Truck
+                                    <span className={`badge ${dcRawPct > 100 ? 'badge-danger' : 'badge-success'}`}>
+                                      {dcUtilPct}% of truck
                                     </span>
                                   )}
                                 </td>
-                                <td className="px-4 py-3 text-center">
+                                <td className="text-right">
                                   <button
                                     onClick={() => d.id && onEditDispatch(d.id)}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer"
+                                    className="btn btn-secondary btn-sm"
                                   >
                                     <Eye size={13} />
                                     <span>Open</span>
@@ -624,8 +589,8 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
 
               if (keys.length === 0) {
                 return (
-                  <div className="col-span-3 py-8 text-center text-xs font-medium text-slate-400 bg-slate-50 border border-slate-200 rounded-xl">
-                    No active vehicle dispatch data available. Create a new dispatch to begin tracking.
+                  <div className="col-span-3 panel empty-state py-10">
+                    No dispatches in this period. Utilization appears here once trucks are loaded.
                   </div>
                 );
               }
@@ -638,21 +603,21 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                 const singleCap = getVehicleMaxPallets(sz);
 
                 return (
-                  <div key={i} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-2xs hover:border-slate-300 transition-all">
+                  <div key={i} className="panel space-y-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <Truck size={16} className="text-slate-600" />
-                        <span className="font-extrabold text-slate-800 text-sm">{sz} Vehicles</span>
+                        <Truck size={16} className="text-slate-500" />
+                        <span className="font-bold text-slate-800 text-sm">{sz} trucks</span>
                       </div>
-                      <span className="text-xs px-2.5 py-0.5 bg-white border border-slate-200 font-bold text-slate-600 rounded-full" title={`${item.trucks.size} unique trucks`}>
-                        {item.count} {item.count === 1 ? 'Dispatch' : 'Dispatches'}
+                      <span className="badge badge-neutral bg-white" title={`${item.trucks.size} unique trucks`}>
+                        {item.count} {item.count === 1 ? 'dispatch' : 'dispatches'}
                       </span>
                     </div>
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold text-slate-600">
-                        <span>Loaded Pallets</span>
-                        <span className="font-mono font-bold text-slate-800">{item.loaded.toLocaleString()} / {item.max.toLocaleString()}</span>
+                      <div className="flex justify-between text-xs text-slate-600">
+                        <span>Pallets loaded</span>
+                        <span className="font-bold text-slate-800 tabular-nums">{item.loaded.toLocaleString()} / {item.max.toLocaleString()}</span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                         <div
@@ -664,16 +629,10 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] pt-1 text-slate-500 border-t border-slate-200/60 font-medium">
-                      <span>Capacity: {singleCap} Pallets/dispatch</span>
-                      <span className={`font-bold px-2 py-0.5 rounded border ${
-                        isOver
-                          ? 'bg-rose-50 text-rose-700 border-rose-200'
-                          : rawPct >= 80
-                          ? 'bg-amber-50 text-amber-700 border-amber-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
-                        {pct}% Utilized
+                    <div className="flex items-center justify-between text-2xs pt-2.5 text-slate-500 border-t border-slate-200">
+                      <span>{singleCap} pallets per dispatch</span>
+                      <span className={`badge ${isOver ? 'badge-danger' : rawPct >= 80 ? 'badge-warning' : 'badge-success'}`}>
+                        {pct}% utilized
                       </span>
                     </div>
                   </div>
@@ -682,6 +641,7 @@ export const VehicleUtilizationTracker: React.FC<VehicleUtilizationTrackerProps>
             })()}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

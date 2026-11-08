@@ -37,25 +37,26 @@ export const UnlockModal: React.FC<UnlockModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Unlock settings">
+      <div className="modal-backdrop" onClick={handleClose} />
+      <div className="modal-panel max-w-sm overflow-hidden">
         <div className="p-6 text-center space-y-4">
-          <div className="mx-auto w-14 h-14 bg-amber-50 border border-amber-200 text-amber-600 rounded-2xl flex items-center justify-center shadow-inner">
-            <Lock size={28} />
+          <div className="mx-auto w-14 h-14 rounded-xl grid place-items-center bg-brand-50 text-brand-700">
+            <Lock size={26} />
           </div>
 
           <div>
-            <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">Unlock Advanced Settings</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Enter administrator password to access company profile, printers, database backups, and system updates.
+            <h3 className="text-lg font-bold text-slate-900">Unlock all settings</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Enter the admin password to change company details, printers, backups and updates.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 uppercase flex items-center gap-1.5">
+            <div>
+              <label className="field-label flex items-center gap-1.5">
                 <Key size={13} className="text-slate-400" />
-                Security Password
+                Password
               </label>
               <div className="relative">
                 <input
@@ -65,21 +66,22 @@ export const UnlockModal: React.FC<UnlockModalProps> = ({
                     setPasswordInput(e.target.value);
                     if (passError) setPassError('');
                   }}
-                  placeholder="Enter password..."
+                  placeholder="Password"
                   autoFocus
-                  className="w-full pl-4 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:bg-white focus:border-[#4BB8FA] font-mono transition-all text-slate-800 font-bold"
+                  className="input h-11 pr-10 font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-icon"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               {passError && (
-                <p className="text-xs font-bold text-rose-600 pt-1 flex items-center gap-1">
-                  <span>⚠</span> {passError}
+                <p className="text-xs font-bold text-rose-600 pt-1.5" role="alert">
+                  {passError}
                 </p>
               )}
             </div>
@@ -88,15 +90,15 @@ export const UnlockModal: React.FC<UnlockModalProps> = ({
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+                className="btn btn-secondary flex-1"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors shadow-sm"
+                className="btn btn-primary flex-1"
               >
-                Unlock Settings
+                Unlock
               </button>
             </div>
           </form>

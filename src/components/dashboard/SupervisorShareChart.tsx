@@ -1,4 +1,5 @@
 import React from 'react';
+import { CardHeader } from '../ui';
 
 interface SupervisorShareChartProps {
   dispatchesList: any[];
@@ -35,16 +36,12 @@ export const SupervisorShareChart: React.FC<SupervisorShareChartProps> = ({
 
   if (!supervisorShareData || supervisorShareData.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider border-b border-slate-50 pb-3 flex items-center justify-between">
-          <span>Supervisor Shares (Top 5 Distribution)</span>
-          <span className="text-xs font-semibold text-slate-400 lowercase font-sans">
-            {dispatchesList.length} total recorded
-          </span>
-        </h4>
-        <div className="h-64 flex items-center justify-center text-xs text-slate-400 font-bold uppercase">
-          No supervisor share data available
-        </div>
+      <div className="card">
+        <CardHeader
+          title="Dispatches by supervisor"
+          subtitle={`Top 5 of ${dispatchesList.length} recorded dispatches`}
+        />
+        <div className="h-64 grid place-items-center text-sm text-slate-500">No dispatches recorded yet.</div>
       </div>
     );
   }
@@ -70,15 +67,13 @@ export const SupervisorShareChart: React.FC<SupervisorShareChartProps> = ({
   });
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-      <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider border-b border-slate-50 pb-3 flex items-center justify-between">
-        <span>Supervisor Shares (Top 5 Distribution)</span>
-        <span className="text-xs font-semibold text-slate-400 lowercase font-sans">
-          {dispatchesList.length} total recorded
-        </span>
-      </h4>
+    <div className="card">
+      <CardHeader
+        title="Dispatches by supervisor"
+        subtitle={`Top 5 of ${dispatchesList.length} recorded dispatches`}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-4">
+      <div className="card-body grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div className="flex justify-center">
           <svg viewBox="0 0 200 200" className="w-56 h-56">
             <circle cx="100" cy="100" r="55" fill="transparent" stroke="#f1f5f9" strokeWidth="18" />
@@ -98,7 +93,7 @@ export const SupervisorShareChart: React.FC<SupervisorShareChartProps> = ({
               />
             ))}
             <g>
-              <text x="100" y="96" textAnchor="middle" className="text-[10px] font-extrabold fill-slate-400 uppercase tracking-wider">TOTAL</text>
+              <text x="100" y="96" textAnchor="middle" className="text-2xs font-bold fill-slate-400">Total</text>
               <text x="100" y="118" textAnchor="middle" className="text-[17px] font-black fill-slate-800 font-mono">{total}</text>
             </g>
           </svg>
@@ -106,18 +101,18 @@ export const SupervisorShareChart: React.FC<SupervisorShareChartProps> = ({
 
         <div className="flex flex-col gap-3.5 w-full max-w-md mx-auto">
           {slices.map((slice, idx) => (
-            <div key={idx} className="flex items-center justify-between text-sm border-b border-slate-50 pb-2 last:border-0 last:pb-0">
+            <div key={idx} className="flex items-center justify-between text-sm border-b border-slate-100 pb-3 last:border-0 last:pb-0">
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
+                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
                 <span className="font-bold text-slate-700 truncate uppercase">{slice.name}</span>
               </div>
               <div className="flex items-baseline gap-2 shrink-0 ml-4">
-                <span className="font-mono font-bold text-slate-700 text-xs">
+                <span className="font-bold text-slate-700 text-xs tabular-nums">
                   {slice.count} {slice.count === 1 ? 'dispatch' : 'dispatches'} ({slice.percentage}%)
                 </span>
                 {slice.pallets > 0 && (
-                  <span className="text-[10px] text-slate-400 font-semibold">
-                    • {slice.pallets} Pallets
+                  <span className="text-2xs text-slate-400 font-bold">
+                    {slice.pallets} pallets
                   </span>
                 )}
               </div>

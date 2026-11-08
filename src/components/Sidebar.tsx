@@ -19,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
-    { id: 'pipeline', name: 'Dispatch Pipeline', icon: Truck, shortcut: 'Ctrl+N' },
+    { id: 'pipeline', name: 'Dispatch pipeline', icon: Truck, shortcut: 'Ctrl+N' },
     { id: 'completed', name: 'Completed', icon: History, shortcut: 'Ctrl+H' },
     { id: 'reports', name: 'Reports', icon: BarChart3 },
     { id: 'settings', name: 'Settings', icon: Settings },
@@ -57,17 +57,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="hidden md:flex p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="hidden md:inline-flex btn btn-ghost btn-icon"
                 title="Collapse Sidebar (Ctrl+B)"
                 aria-label="Collapse Sidebar"
               >
-                <PanelLeftClose size={32} className="stroke-[2]" />
+                <PanelLeftClose size={20} />
               </button>
             )}
             {onCloseMobile && (
               <button
                 onClick={onCloseMobile}
-                className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+                className="md:hidden btn btn-ghost btn-icon"
                 aria-label="Close Sidebar"
               >
                 <X size={20} />
@@ -80,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center group"
+            className="p-1.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center group hover:bg-slate-50"
             title="Click to Expand Sidebar (Ctrl+B)"
             aria-label="Expand Sidebar"
           >
@@ -107,11 +107,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 title={isCollapsed ? `${item.name}${item.shortcut ? ` (${item.shortcut})` : ''}` : undefined}
                 className={`flex items-center ${isCollapsed
-                    ? 'w-11 h-11 aspect-square rounded-xl justify-center mx-auto'
-                    : 'w-full justify-between px-3.5 py-3 rounded-lg'
+                    ? 'w-11 h-11 rounded-lg justify-center mx-auto'
+                    : 'w-full justify-between h-10 px-3 rounded-lg'
                   } text-sm font-bold transition-all duration-150 group cursor-pointer ${isActive
-                    ? 'bg-[#4BB8FA] text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:bg-[#4BB8FA]/10 hover:text-slate-900'
+                    ? 'bg-brand text-slate-900'
+                    : 'text-slate-500 hover:bg-brand/10 hover:text-slate-900'
                   }`}
               >
                 <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
@@ -123,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 {!isCollapsed && item.shortcut && (
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold hidden sm:inline-block ${isActive ? 'bg-slate-900/10 text-slate-800' : 'bg-slate-100 text-slate-400 group-hover:text-slate-600'
+                    className={`text-2xs px-1.5 py-0.5 rounded-md font-mono font-bold hidden sm:inline-block ${isActive ? 'bg-slate-900/10 text-slate-800' : 'bg-slate-100 text-slate-400 group-hover:text-slate-600'
                       }`}
                   >
                     {item.shortcut}
@@ -148,12 +148,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {!isCollapsed ? (
           <>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest text-center">Powered By</span>
+            <span className="text-2xs text-slate-400 font-bold text-center">Powered by</span>
             <img src="stivate.png" alt="Stivate" className="h-16 sm:h-20 w-auto object-contain brightness-95 opacity-90 hover:opacity-100 transition-all duration-150" />
           </>
         ) : (
           <div
-            className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-600 cursor-pointer hover:bg-slate-200 transition-colors"
+            className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-2xs font-black text-slate-600 cursor-pointer hover:bg-slate-200 transition-colors"
             title="Powered by Stivate"
             onClick={onToggleCollapse}
           >

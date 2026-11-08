@@ -82,28 +82,28 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
     >
       {activePolicyModal === 'documentation' && (
         <div className="space-y-6 text-slate-700 leading-relaxed text-sm select-none">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div className="panel flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <BookOpen size={18} className="text-[#4BB8FA]" />
+                <BookOpen size={18} className="text-brand-700" />
                 <span>User Documentation & Operating Manual</span>
               </h2>
-              <p className="text-xs text-slate-500 font-medium">Standard Operating Procedures for DC Delivery System</p>
+              <p className="text-xs text-slate-500 font-normal">Standard Operating Procedures for DC Delivery System</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100">v{currentVersion}</span>
-              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100">Offline-First</span>
+              <span className="tag">v{currentVersion}</span>
+              <span className="badge badge-success">Works offline</span>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2 overflow-x-auto">
+          <div className="segmented max-w-full overflow-x-auto" role="tablist">
             {[
-              { id: 'overview', label: '1. Quick Start Overview', icon: HelpCircle },
-              { id: 'vehicles', label: '2. Vehicle Sizes & Pallets', icon: HardDriveDownload },
-              { id: 'printing', label: '3. Printing Rules', icon: FileText },
-              { id: 'reports', label: '4. Reports & Security', icon: Lock },
-              { id: 'shortcuts', label: '5. Keyboard Shortcuts', icon: Keyboard },
+              { id: 'overview', label: 'Quick start', icon: HelpCircle },
+              { id: 'vehicles', label: 'Vehicle sizes', icon: HardDriveDownload },
+              { id: 'printing', label: 'Printing', icon: FileText },
+              { id: 'reports', label: 'Reports and security', icon: Lock },
+              { id: 'shortcuts', label: 'Keyboard shortcuts', icon: Keyboard },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = docTab === tab.id;
@@ -111,11 +111,10 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setDocTab(tab.id as any)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                    active
-                      ? 'bg-[#4BB8FA] text-slate-900 shadow-xs'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/60'
-                  }`}
+                  role="tab"
+                  aria-selected={active}
+                  aria-pressed={active}
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap"
                 >
                   <Icon size={14} />
                   <span>{tab.label}</span>
@@ -127,21 +126,21 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
           {/* Tab Contents */}
           {docTab === 'overview' && (
             <div className="space-y-4">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Standard Dispatch Workflow</h4>
+              <h4 className="text-sm font-bold text-slate-900">Standard Dispatch Workflow</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800 uppercase">
-                    <span className="w-6 h-6 rounded-full bg-[#4BB8FA] text-slate-950 flex items-center justify-center font-black">1</span>
+                <div className="panel space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <span className="w-6 h-6 rounded-full bg-brand text-slate-900 grid place-items-center text-xs font-bold shrink-0">1</span>
                     <span>Create New Dispatch</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Press <kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-[10px] text-slate-800 font-bold">Ctrl+N</kbd> or click <strong>Dispatch Pipeline → Create New Dispatch</strong>. Enter Vehicle Number, Supervisor Name, Consignee Address, and Pallet Capacity Count.
+                    Press <kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-2xs text-slate-800 font-bold">Ctrl+N</kbd> or click <strong>Dispatch Pipeline → Create New Dispatch</strong>. Enter Vehicle Number, Supervisor Name, Consignee Address, and Pallet Capacity Count.
                   </p>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800 uppercase">
-                    <span className="w-6 h-6 rounded-full bg-[#4BB8FA] text-slate-950 flex items-center justify-center font-black">2</span>
+                <div className="panel space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <span className="w-6 h-6 rounded-full bg-brand text-slate-900 grid place-items-center text-xs font-bold shrink-0">2</span>
                     <span>Scan & Verify Pull Lists</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
@@ -149,23 +148,23 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                   </p>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800 uppercase">
-                    <span className="w-6 h-6 rounded-full bg-[#4BB8FA] text-slate-950 flex items-center justify-center font-black">3</span>
+                <div className="panel space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <span className="w-6 h-6 rounded-full bg-brand text-slate-900 grid place-items-center text-xs font-bold shrink-0">3</span>
                     <span>Print Document Sets</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Click the green <strong>Print Set</strong> button (or <kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-[10px] text-slate-800 font-bold">Ctrl+P</kbd>) to automatically print 6 copies (3x Challan + 3x Barcode sheets). Single print buttons send 1 copy.
+                    Click the green <strong>Print Set</strong> button (or <kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-2xs text-slate-800 font-bold">Ctrl+P</kbd>) to automatically print 6 copies (3x Challan + 3x Barcode sheets). Single print buttons send 1 copy.
                   </p>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800 uppercase">
-                    <span className="w-6 h-6 rounded-full bg-[#4BB8FA] text-slate-950 flex items-center justify-center font-black">4</span>
+                <div className="panel space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <span className="w-6 h-6 rounded-full bg-brand text-slate-900 grid place-items-center text-xs font-bold shrink-0">4</span>
                     <span>Complete & Archive</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Click <strong>Mark Ready</strong> while loading, then <strong>Complete Dispatch</strong> upon departure. The animated truck confirmation executes and archives the dispatch under <strong>Completed</strong> (<kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-[10px] text-slate-800 font-bold">Ctrl+H</kbd>).
+                    Click <strong>Mark Ready</strong> while loading, then <strong>Complete Dispatch</strong> upon departure. The animated truck confirmation executes and archives the dispatch under <strong>Completed</strong> (<kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-2xs text-slate-800 font-bold">Ctrl+H</kbd>).
                   </p>
                 </div>
               </div>
@@ -174,7 +173,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
           {docTab === 'vehicles' && (
             <div className="space-y-4 text-xs text-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Vehicle Sizes & Truck Pallet Capacities</h4>
+              <h4 className="text-sm font-bold text-slate-900">Vehicle Sizes & Truck Pallet Capacities</h4>
               <p>Truck utilization percentage is tracked automatically based on configured vehicle dimensions:</p>
               <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-200">
                 <div className="p-3 bg-slate-100 font-bold text-slate-800 grid grid-cols-3">
@@ -182,22 +181,22 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                   <span>Max Pallet Capacity</span>
                   <span>Calculation Rule</span>
                 </div>
-                <div className="p-3 grid grid-cols-3 font-mono font-semibold">
-                  <span className="text-blue-700">32 ft</span>
+                <div className="p-3 grid grid-cols-3 font-mono font-bold">
+                  <span className="text-slate-900">32 ft</span>
                   <span>16 Pallets Max</span>
                   <span className="text-slate-500">Standard Heavy Trailer</span>
                 </div>
-                <div className="p-3 grid grid-cols-3 font-mono font-semibold">
-                  <span className="text-indigo-700">20 ft</span>
+                <div className="p-3 grid grid-cols-3 font-mono font-bold">
+                  <span className="text-slate-900">20 ft</span>
                   <span>8 Pallets Max</span>
                   <span className="text-slate-500">Medium Container</span>
                 </div>
-                <div className="p-3 grid grid-cols-3 font-mono font-semibold">
-                  <span className="text-amber-700">10 ft</span>
+                <div className="p-3 grid grid-cols-3 font-mono font-bold">
+                  <span className="text-slate-900">10 ft</span>
                   <span>2 Pallets Max</span>
                   <span className="text-slate-500">Small Pickup / Van</span>
                 </div>
-                <div className="p-3 grid grid-cols-3 font-mono font-semibold">
+                <div className="p-3 grid grid-cols-3 font-mono font-bold">
                   <span className="text-slate-700">Custom (e.g. N ft)</span>
                   <span>Floor(N / 2) Pallets</span>
                   <span className="text-slate-500">Dynamic length division</span>
@@ -211,7 +210,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
           {docTab === 'printing' && (
             <div className="space-y-4 text-xs text-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Printer Configuration & Ink-Saving Rules</h4>
+              <h4 className="text-sm font-bold text-slate-900">Printer Configuration & Ink-Saving Rules</h4>
               <ul className="list-disc pl-4 space-y-2">
                 <li><strong>Printer Ink Preservation:</strong> Grey table borders and barcode line boxes have been removed to preserve printer toner cartridge life.</li>
                 <li><strong>Multi-Line Address Wrapping:</strong> Long consignee addresses wrap cleanly across multiple lines in bold text without truncating (<code>...</code>). Subheader barcode bars adjust height dynamically.</li>
@@ -223,11 +222,11 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
           {docTab === 'reports' && (
             <div className="space-y-4 text-xs text-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Locked Reports & Automatic Backups</h4>
+              <h4 className="text-sm font-bold text-slate-900">Locked Reports & Automatic Backups</h4>
               <div className="space-y-3">
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 space-y-1">
                   <strong>Reports Password Lock:</strong>
-                  <p>The Reports & Analytics tab is protected with password security. Access password: <code className="font-mono font-extrabold bg-white px-2 py-0.5 rounded border border-rose-300">i3pl@123</code></p>
+                  <p>The Reports & Analytics tab is protected with password security. Access password: <code className="font-mono font-black bg-white px-2 py-0.5 rounded border border-rose-300">i3pl@123</code></p>
                 </div>
                 <p>&bull; <strong>Automatic Local Backups:</strong> The system automatically writes timestamped SQLite database backups into your configured Backup folder every time the application closes.</p>
                 <p>&bull; <strong>Cloud Uploads:</strong> Click <strong>Upload Backup on Cloud</strong> in Settings anytime to sync local database snapshots with encrypted cloud storage.</p>
@@ -237,7 +236,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
           {docTab === 'shortcuts' && (
             <div className="space-y-4 text-xs text-slate-600">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Keyboard Shortcuts Quick Reference</h4>
+              <h4 className="text-sm font-bold text-slate-900">Keyboard Shortcuts Quick Reference</h4>
               <div className="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-200">
                 {[
                   { key: 'Ctrl + N', desc: 'Create New Dispatch Truck' },
@@ -247,8 +246,8 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                   { key: 'Ctrl + F', desc: 'Focus Pull List Search Box' },
                 ].map((sc, i) => (
                   <div key={i} className="p-3 flex items-center justify-between">
-                    <span className="font-medium text-slate-700">{sc.desc}</span>
-                    <kbd className="px-2.5 py-1 bg-white border border-slate-300 rounded-md font-mono font-bold text-slate-800 shadow-2xs">
+                    <span className="font-normal text-slate-700">{sc.desc}</span>
+                    <kbd className="px-2.5 py-1 bg-white border border-slate-300 rounded-md font-mono font-bold text-slate-800 shadow-xs">
                       {sc.key}
                     </kbd>
                   </div>
@@ -261,15 +260,15 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
       {activePolicyModal === 'feature-request' && (
         <div className="space-y-5 text-slate-700 text-sm select-none">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+          <div className="panel flex items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <Sparkles size={18} className="text-emerald-500" />
+                <Sparkles size={18} className="text-brand-700" />
                 <span>Submit Feature Request & Product Feedback</span>
               </h2>
-              <p className="text-xs text-slate-500 font-medium">Send feature ideas directly to Stivate Product Engineering</p>
+              <p className="text-xs text-slate-500 font-normal">Send feature ideas directly to Stivate Product Engineering</p>
             </div>
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-md border border-emerald-100 text-xs">
+            <span className="badge badge-neutral">
               Direct Feedback
             </span>
           </div>
@@ -277,7 +276,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
           <form onSubmit={handleFeatureRequestSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-600 uppercase block">Your Name</label>
+                <label className="field-label">Your name</label>
                 <input
                   type="text"
                   name="name"
@@ -285,12 +284,12 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                   onChange={(e) => setFeatureRequestName(e.target.value)}
                   required
                   placeholder="Operator / Admin Name"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium"
+                  className="input"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-600 uppercase block">Contact Email</label>
+                <label className="field-label">Contact email</label>
                 <input
                   type="email"
                   name="email"
@@ -298,18 +297,18 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                   onChange={(e) => setFeatureRequestEmail(e.target.value)}
                   required
                   placeholder="email@company.com"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium"
+                  className="input"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-600 uppercase block">Feature Category</label>
+              <label className="field-label">Feature category</label>
               <select
                 name="category"
                 value={featureRequestCategory}
                 onChange={(e) => setFeatureRequestCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white font-medium cursor-pointer"
+                className="input"
               >
                 <option value="Logistics & Dispatches">Logistics & Dispatches Workflow</option>
                 <option value="Printing & Barcodes">Printing & Barcode Sheets</option>
@@ -321,7 +320,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-600 uppercase block">Feature Description / Feedback Details</label>
+              <label className="field-label">Feature description / feedback details</label>
               <textarea
                 name="message"
                 value={featureRequestMessage}
@@ -329,12 +328,12 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
                 required
                 rows={4}
                 placeholder="Describe the feature or improvement you'd like to see..."
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-slate-50 focus:outline-none focus:border-emerald-500 focus:bg-white font-sans"
+                className="input"
               />
             </div>
 
             {featureRequestResult && (
-              <div className={`p-3 rounded-lg text-xs font-semibold border ${
+              <div className={`p-3 rounded-lg text-xs font-bold border ${
                 featureRequestStatus === 'success'
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                   : featureRequestStatus === 'error'
@@ -349,7 +348,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer"
+                className="btn btn-secondary"
               >
                 Close
               </button>
@@ -368,13 +367,13 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
       {activePolicyModal === 'privacy' && (
         <div className="space-y-6 text-slate-700 leading-relaxed text-sm">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 select-none">
+          <div className="panel flex flex-wrap items-center justify-between gap-3 select-none">
             <div>
               <h2 className="text-base font-bold text-slate-800">Privacy Policy</h2>
-              <p className="text-xs text-slate-500 font-medium">Offline Warehouse Dispatch Management Software</p>
+              <p className="text-xs text-slate-500 font-normal">Offline Warehouse Dispatch Management Software</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100">Effective: 10 Aug 2026</span>
+              <span className="badge badge-neutral">Effective 10 Aug 2026</span>
               <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">v1.0</span>
               <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100">Provider: Stivate</span>
             </div>
@@ -382,7 +381,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
           <div className="space-y-5">
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">1. Introduction</h4>
+              <h4 className="text-sm font-bold text-slate-900">1. Introduction</h4>
               <p className="text-xs text-slate-600">
                 This Privacy Policy explains how Stivate handles information processed through the Offline Warehouse Dispatch Management Software ("Software").
               </p>
@@ -395,7 +394,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">2. Information Processed by the Software</h4>
+              <h4 className="text-sm font-bold text-slate-900">2. Information Processed by the Software</h4>
               <p className="text-xs text-slate-600">Depending on how the customer uses the Software, the following information may be stored:</p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
@@ -425,14 +424,14 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">3. Offline Data Processing</h4>
+              <h4 className="text-sm font-bold text-slate-900">3. Offline Data Processing</h4>
               <p className="text-xs text-slate-600">
                 The Software is designed to operate without an active internet connection. Operational dispatch information is primarily stored on the customer's local computer. Internet connectivity is not required for normal dispatch operations including creating dispatches, scanning Pull Lists, editing dispatches, printing documents, viewing history, and generating reports when the computer is offline.
               </p>
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">4. Cloud Backup & Storage</h4>
+              <h4 className="text-sm font-bold text-slate-900">4. Cloud Backup & Storage</h4>
               <p className="text-xs text-slate-600">
                 The Software may automatically create cloud backups of the local application database to protect against computer failure, database corruption, accidental deletion, hardware failure, or local data loss. Cloud backups contain operational information stored in the application's local database and are performed solely for data protection and recovery.
               </p>
@@ -442,7 +441,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">5. Software Updates & Support Requests</h4>
+              <h4 className="text-sm font-bold text-slate-900">5. Software Updates & Support Requests</h4>
               <p className="text-xs text-slate-600">
                 The Software may periodically check for available software updates by communicating limited technical information necessary to determine whether a newer version is available. Updates provide bug fixes, performance improvements, and security enhancements without transmitting dispatch data.
               </p>
@@ -452,22 +451,22 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">6. Data Sharing, Retention & Deletion</h4>
+              <h4 className="text-sm font-bold text-slate-900">6. Data Sharing, Retention & Deletion</h4>
               <p className="text-xs text-slate-600">
                 Stivate does not sell customer operational data. Local dispatch data remains under customer control. Deletion of local application data may be performed by an authorized customer administrator. Cloud backups are retained according to the backup retention policy agreed upon with the customer.
               </p>
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">7. Security & Customer Responsibility</h4>
+              <h4 className="text-sm font-bold text-slate-900">7. Security & Customer Responsibility</h4>
               <p className="text-xs text-slate-600">
                 Stivate takes reasonable technical and organizational measures (restricted access, database protection, backup controls, access-controlled cloud storage, secure updates) to protect customer information. Customers remain responsible for securing physical PC access, maintaining Windows user accounts, protecting administrator credentials, and preventing unauthorized access.
               </p>
             </section>
 
             <section className="space-y-1.5 pt-2">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">8. Contact</h4>
-              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 text-xs text-slate-700 space-y-1 font-medium select-none">
+              <h4 className="text-sm font-bold text-slate-900">8. Contact</h4>
+              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 text-xs text-slate-700 space-y-1 font-normal select-none">
                 <p><strong>Provider:</strong> Stivate</p>
                 <p><strong>Email:</strong> support@stivate.com</p>
                 <p><strong>Website:</strong> https://stivate.com</p>
@@ -479,21 +478,21 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
 
       {activePolicyModal === 'security' && (
         <div className="space-y-6 text-slate-700 leading-relaxed text-sm">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 select-none">
+          <div className="panel flex flex-wrap items-center justify-between gap-3 select-none">
             <div>
               <h2 className="text-base font-bold text-slate-800">Security Policy</h2>
-              <p className="text-xs text-slate-500 font-medium">Offline Warehouse Dispatch Management Software Architecture & Security Controls</p>
+              <p className="text-xs text-slate-500 font-normal">Offline Warehouse Dispatch Management Software Architecture & Security Controls</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100">Offline-First</span>
-              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100">Encrypted Backups</span>
+              <span className="badge badge-success">Works offline</span>
+              <span className="badge badge-success">Encrypted backups</span>
               <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md border border-slate-200">Stivate Security</span>
             </div>
           </div>
 
           <div className="space-y-5">
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">1. Purpose & Security Architecture</h4>
+              <h4 className="text-sm font-bold text-slate-900">1. Purpose & Security Architecture</h4>
               <p className="text-xs text-slate-600">
                 This Security Policy describes the security principles and controls applicable to the Software and its supporting services. The primary objective is to protect customer operational information while maintaining reliable warehouse operations without internet dependencies.
               </p>
@@ -513,7 +512,7 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">2. Database & Backup Security Controls</h4>
+              <h4 className="text-sm font-bold text-slate-900">2. Database & Backup Security Controls</h4>
               <ul className="list-disc pl-4 text-xs text-slate-600 space-y-1">
                 <li><strong>Local Database:</strong> Stored outside installation directory, protected by Windows filesystem permissions, not exposed through unauthenticated network services.</li>
                 <li><strong>Local & Cloud Backups:</strong> Stored with controlled permissions and defined retention. Cloud backups use private storage, disabled public access, restricted roles, and encryption in transit/rest.</li>
@@ -522,36 +521,36 @@ export const PolicyAndDocModals: React.FC<PolicyAndDocModalsProps> = ({
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">3. Access Control & Release Integrity</h4>
+              <h4 className="text-sm font-bold text-slate-900">3. Access Control & Release Integrity</h4>
               <p className="text-xs text-slate-600">
                 Access to customer systems and cloud infrastructure follows the principle of least privilege. Software updates are distributed exclusively through authenticated/trusted release infrastructure with explicit semantic versioning (e.g. 1.0.0, 1.0.1, 1.1.0, 2.0.0).
               </p>
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">4. Incident Response Steps</h4>
+              <h4 className="text-sm font-bold text-slate-900">4. Incident Response Steps</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pt-1 select-none">
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
                   <strong className="text-slate-800">1. Identify</strong>
-                  <p className="text-[11px] text-slate-500">Confirm & log incident</p>
+                  <p className="text-2xs text-slate-500">Confirm & log incident</p>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
                   <strong className="text-slate-800">2. Contain</strong>
-                  <p className="text-[11px] text-slate-500">Isolate affected system</p>
+                  <p className="text-2xs text-slate-500">Isolate affected system</p>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
                   <strong className="text-slate-800">3. Recover</strong>
-                  <p className="text-[11px] text-slate-500">Restore safely from backups</p>
+                  <p className="text-2xs text-slate-500">Restore safely from backups</p>
                 </div>
                 <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
                   <strong className="text-slate-800">4. Resolve</strong>
-                  <p className="text-[11px] text-slate-500">Apply patch & notify</p>
+                  <p className="text-2xs text-slate-500">Apply patch & notify</p>
                 </div>
               </div>
             </section>
 
             <section className="space-y-1.5">
-              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">5. Security Responsibilities</h4>
+              <h4 className="text-sm font-bold text-slate-900">5. Security Responsibilities</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
                 <div className="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100 space-y-1">
                   <strong className="text-emerald-900">Stivate Responsibilities:</strong>

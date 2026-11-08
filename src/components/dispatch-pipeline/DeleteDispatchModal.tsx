@@ -25,24 +25,24 @@ export const DeleteDispatchModal: React.FC<DeleteDispatchModalProps> = ({
           onClose();
         }
       }}
-      title="Delete Dispatch Confirmation"
+      title="Delete dispatch"
     >
       <div className="space-y-4 select-none">
-        <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3">
+        <div className="alert alert-danger">
           <AlertTriangle className="text-rose-600 shrink-0 mt-0.5" size={20} />
           <div className="space-y-1">
-            <h4 className="text-sm font-bold text-rose-900">Are you sure you want to delete this DC?</h4>
-            <p className="text-xs text-rose-700">
+            <h4 className="font-bold text-rose-900">Delete this DC?</h4>
+            <p className="text-xs text-rose-700 leading-relaxed">
               This will permanently delete dispatch <strong className="font-mono">{deleteTarget?.dc_no}</strong> and remove any pull lists associated with it from the active pipeline.
             </p>
           </div>
         </div>
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="modal-footer">
           <button
             type="button"
             disabled={isDeleting}
             onClick={onClose}
-            className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+            className="btn btn-secondary"
           >
             Cancel
           </button>
@@ -50,17 +50,17 @@ export const DeleteDispatchModal: React.FC<DeleteDispatchModalProps> = ({
             type="button"
             disabled={isDeleting}
             onClick={onConfirm}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm cursor-pointer flex items-center gap-1.5"
+            className="btn btn-danger"
           >
             {isDeleting ? (
               <>
                 <Hourglass size={13} className="animate-spin" />
-                <span>Deleting...</span>
+                <span>Deleting…</span>
               </>
             ) : (
               <>
                 <Trash2 size={13} />
-                <span>Delete Dispatch</span>
+                <span>Delete dispatch</span>
               </>
             )}
           </button>

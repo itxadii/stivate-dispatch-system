@@ -31,19 +31,16 @@ export const ReportControls: React.FC<ReportControlsProps> = ({
   hasData,
 }) => {
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="card p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
+      <div className="segmented flex-wrap self-start" role="group" aria-label="Report type">
         {(['loading-summary', 'daily', 'monthly', 'vehicle', 'supplier'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setReportType(t)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-150 uppercase tracking-wide cursor-pointer ${
-              reportType === t
-                ? 'bg-[#4BB8FA] text-slate-900 shadow-none'
-                : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100'
-            }`}
+            aria-pressed={reportType === t}
+            className="h-8! px-3.5!"
           >
-            {t === 'loading-summary' ? 'Loading Summary' : t === 'supplier' ? 'Supervisor Wise' : `${t} Wise`}
+            {{ 'loading-summary': 'Loading summary', daily: 'By day', monthly: 'By month', vehicle: 'By vehicle', supplier: 'By supervisor' }[t]}
           </button>
         ))}
       </div>
@@ -51,14 +48,15 @@ export const ReportControls: React.FC<ReportControlsProps> = ({
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         {reportType === 'loading-summary' && (
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-            <MapPin size={14} className="text-slate-400" />
+          <div className="relative">
+            <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               value={selectedDestination}
               onChange={(e) => setSelectedDestination(e.target.value)}
-              className="bg-transparent border-none text-xs focus:outline-none text-slate-700 font-semibold cursor-pointer"
+              className="input w-auto pl-8"
+              aria-label="Destination"
             >
-              <option value="ALL">All Destinations</option>
+              <option value="ALL">All destinations</option>
               {destinations.map((d, i) => (
                 <option key={i} value={d}>{d}</option>
               ))}
@@ -66,33 +64,32 @@ export const ReportControls: React.FC<ReportControlsProps> = ({
           </div>
         )}
 
-        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-          <Calendar size={14} className="text-slate-400" />
+        <div className="flex items-center gap-2">
+          <Calendar size={15} className="text-slate-400 shrink-0" />
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="bg-transparent border-none text-xs focus:outline-none text-slate-700 font-semibold"
+            className="input w-auto"
+            aria-label="From date"
           />
-        </div>
-        <span className="text-xs font-bold text-slate-400">to</span>
-        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-          <Calendar size={14} className="text-slate-400" />
+          <span className="text-xs text-slate-400">to</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="bg-transparent border-none text-xs focus:outline-none text-slate-700 font-semibold"
+            className="input w-auto"
+            aria-label="To date"
           />
         </div>
 
         <button
           onClick={onExportExcel}
           disabled={!hasData}
-          className="flex items-center gap-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer disabled:bg-slate-200 disabled:text-slate-400 transition-colors shadow-sm"
+          className="btn btn-secondary"
         >
           <Download size={14} />
-          <span>Export to Excel</span>
+          <span>Export Excel</span>
         </button>
       </div>
     </div>

@@ -73,7 +73,7 @@ export const BarcodePreview: React.FC<BarcodePreviewProps> = ({ value, height = 
   }
 
   return (
-    <div className="flex flex-col items-center select-none bg-white p-3 rounded-lg border border-slate-100 shadow-sm w-fit mx-auto">
+    <div className="flex flex-col items-center select-none bg-white p-3 rounded-lg border border-slate-100 shadow-xs w-fit mx-auto">
       <div className="flex items-stretch" style={{ height: `${height}px` }}>
         {elements.map((el, idx) => {
           const widthClass = el.isWide ? 'w-[3px]' : 'w-[1px]';
@@ -87,7 +87,7 @@ export const BarcodePreview: React.FC<BarcodePreviewProps> = ({ value, height = 
           );
         })}
       </div>
-      <span className="text-[10px] font-mono tracking-widest text-slate-500 mt-1 select-all font-semibold uppercase">
+      <span className="text-2xs font-mono tracking-widest text-slate-500 mt-1 select-all font-bold uppercase">
         {value}
       </span>
     </div>

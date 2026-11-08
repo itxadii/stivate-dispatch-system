@@ -112,17 +112,17 @@ function App() {
   const getTabTitle = () => {
     switch (activeTab) {
       case 'dashboard':
-        return 'Dashboard Overview';
+        return 'Dashboard';
       case 'new-dispatch':
-        return editDispatchId ? 'Edit Dispatch' : 'Create Dispatch';
+        return editDispatchId ? 'Edit dispatch' : 'New dispatch';
       case 'pipeline':
-        return 'Dispatch Pipeline (Active)';
+        return 'Dispatch pipeline';
       case 'completed':
-        return 'Completed Dispatches (Shipped)';
+        return 'Completed dispatches';
       case 'reports':
-        return 'Performance Reports';
+        return 'Reports';
       case 'settings':
-        return 'System Settings';
+        return 'Settings';
       default:
         return 'Warehouse System';
     }
@@ -152,7 +152,7 @@ function App() {
       {isMobileSidebarOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div 
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
           <div className="relative flex-1 max-w-xs w-full bg-white h-full z-50 shadow-2xl">
@@ -182,7 +182,7 @@ function App() {
         />
 
         {/* Content Body */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {activeTab === 'dashboard' && (
             <Dashboard 
               setActiveTab={(tab) => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { CardHeader } from '../ui';
 
 export type TrendRange = '7days' | 'thisMonth' | '6months' | 'years';
 
@@ -16,26 +17,29 @@ export const DispatchTrendChart: React.FC<DispatchTrendChartProps> = ({
   trendLoading,
 }) => {
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-50 pb-3">
-        <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Dispatches Trend Analytics</h4>
-        <select
-          value={trendRange}
-          onChange={(e) => setTrendRange(e.target.value as TrendRange)}
-          className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
-        >
-          <option value="7days">Last 7 Active Days</option>
-          <option value="thisMonth">This Month</option>
-          <option value="6months">Last 6 Months</option>
-          <option value="years">Yearly Trend</option>
-        </select>
-      </div>
+    <div className="card">
+      <CardHeader
+        title="Dispatch trend"
+        subtitle="Number of dispatches created over time"
+        actions={
+          <select
+            value={trendRange}
+            onChange={(e) => setTrendRange(e.target.value as TrendRange)}
+            className="input input-sm w-auto"
+            aria-label="Trend range"
+          >
+            <option value="7days">Last 7 active days</option>
+            <option value="thisMonth">This month</option>
+            <option value="6months">Last 6 months</option>
+            <option value="years">By year</option>
+          </select>
+        }
+      />
+      <div className="card-body">
       {trendLoading ? (
-        <div className="h-64 flex items-center justify-center text-xs text-slate-400 font-medium">
-          Loading trend analytics...
-        </div>
+        <div className="h-64 grid place-items-center text-sm text-slate-500">Loading trend…</div>
       ) : trendData && trendData.length > 0 ? (
-        <div className="pt-2">
+        <div>
           {(() => {
             const counts = trendData.map((d) => d.count);
             const absoluteMin = Math.min(...counts);
@@ -106,9 +110,9 @@ export const DispatchTrendChart: React.FC<DispatchTrendChartProps> = ({
                 </defs>
 
                 {/* Y-Axis Value Labels next to Grid Lines */}
-                <text x={paddingX - 12} y={paddingY + 4} textAnchor="end" className="text-[10px] font-bold fill-slate-400 font-mono">{maxVal}</text>
-                <text x={paddingX - 12} y={(height - paddingY * 2) / 2 + paddingY + 4} textAnchor="end" className="text-[10px] font-bold fill-slate-400 font-mono">{Math.round((maxVal + minVal) / 2)}</text>
-                <text x={paddingX - 12} y={height - paddingY + 4} textAnchor="end" className="text-[10px] font-bold fill-slate-400 font-mono">{minVal}</text>
+                <text x={paddingX - 12} y={paddingY + 4} textAnchor="end" className="text-2xs font-bold fill-slate-400 font-mono">{maxVal}</text>
+                <text x={paddingX - 12} y={(height - paddingY * 2) / 2 + paddingY + 4} textAnchor="end" className="text-2xs font-bold fill-slate-400 font-mono">{Math.round((maxVal + minVal) / 2)}</text>
+                <text x={paddingX - 12} y={height - paddingY + 4} textAnchor="end" className="text-2xs font-bold fill-slate-400 font-mono">{minVal}</text>
 
                 {/* Grid Lines */}
                 <line x1={paddingX} y1={paddingY} x2={width - paddingX} y2={paddingY} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3 3" />
@@ -128,13 +132,13 @@ export const DispatchTrendChart: React.FC<DispatchTrendChartProps> = ({
                       <circle cx={p.x} cy={p.y} r={trendData.length > 15 ? "3.5" : "5"} fill="#ffffff" stroke="#059669" strokeWidth={trendData.length > 15 ? "2" : "2.5"} />
 
                       {showVal && (
-                        <text x={p.x} y={p.y - 12} textAnchor="middle" className="text-[11px] font-extrabold fill-slate-700 font-mono">{p.count}</text>
+                        <text x={p.x} y={p.y - 12} textAnchor="middle" className="text-2xs font-black fill-slate-700 font-mono">{p.count}</text>
                       )}
 
                       {showDate && (
                         <g>
                           <line x1={p.x} y1={height - paddingY} x2={p.x} y2={height - paddingY + 4} stroke="#cbd5e1" strokeWidth="1" />
-                          <text x={p.x} y={height - 10} textAnchor="middle" className="text-[10px] font-bold fill-slate-400">
+                          <text x={p.x} y={height - 10} textAnchor="middle" className="text-2xs font-bold fill-slate-400">
                             {label}
                           </text>
                         </g>
@@ -147,10 +151,9 @@ export const DispatchTrendChart: React.FC<DispatchTrendChartProps> = ({
           })()}
         </div>
       ) : (
-        <div className="h-64 flex items-center justify-center text-xs text-slate-400 font-bold uppercase">
-          No trend data available
-        </div>
+        <div className="h-64 grid place-items-center text-sm text-slate-500">No dispatches in this range yet.</div>
       )}
+      </div>
     </div>
   );
 };

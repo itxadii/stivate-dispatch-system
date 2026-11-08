@@ -95,13 +95,16 @@ export const MasterImportCard: React.FC<MasterImportCardProps> = ({ onImportSucc
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm md:col-span-2 space-y-4">
-      <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Import SAP Master CSV</h4>
+    <div className="card p-5 md:col-span-2 space-y-4">
+      <div>
+        <h4 className="card-title">Import SAP master</h4>
+        <p className="card-subtitle">Upload the SAP export as a CSV file</p>
+      </div>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <label className="flex items-center gap-2 px-5 py-2.5 bg-[#4BB8FA] hover:bg-[#35a0dc] text-slate-900 rounded-lg text-sm font-bold cursor-pointer transition-colors duration-150">
+        <label className="btn btn-primary">
           <Upload size={16} />
-          <span>Select SAP CSV File</span>
+          <span>Choose CSV file</span>
           <input
             type="file"
             accept=".csv"
@@ -109,21 +112,17 @@ export const MasterImportCard: React.FC<MasterImportCardProps> = ({ onImportSucc
             className="hidden"
           />
         </label>
-        <div className="text-xs text-slate-400 leading-normal flex items-start gap-1.5 max-w-sm">
-          <HelpCircle size={15} className="text-slate-300 mt-0.5 shrink-0" />
+        <div className="text-xs text-slate-500 leading-normal flex items-start gap-1.5 max-w-sm">
+          <HelpCircle size={15} className="text-slate-400 mt-0.5 shrink-0" />
           <p>
-            Columns mapped automatically: <strong>Pull List Number</strong>, <strong>ID Number</strong>, <strong>Kit Type</strong>, <strong>Workcell</strong>, <strong>Parts</strong>.
+            Expected columns: <strong>Pull List Number</strong>, <strong>ID Number</strong>, <strong>Kit Type</strong>, <strong>Workcell</strong>, <strong>Parts</strong>.
           </p>
         </div>
       </div>
 
       {importStatus && (
-        <div className={`p-4 rounded-lg border text-sm font-semibold flex items-center gap-2 ${
-          importStatus.type === 'success'
-            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-            : importStatus.type === 'error'
-            ? 'bg-rose-50 text-rose-800 border-rose-200'
-            : 'bg-slate-50 text-slate-800 border-slate-200 animate-pulse'
+        <div role="status" className={`alert items-center font-bold ${
+          importStatus.type === 'success' ? 'alert-success' : importStatus.type === 'error' ? 'alert-danger' : 'alert-info animate-pulse'
         }`}>
           {importStatus.type === 'success' && <CheckCircle size={16} className="text-emerald-500 shrink-0" />}
           <span>{importStatus.text}</span>

@@ -10,33 +10,33 @@ export const StandardReportTable: React.FC<StandardReportTableProps> = ({
   reportData,
 }) => {
   return (
-    <table className="min-w-full divide-y divide-slate-200">
-      <thead className="bg-slate-50">
+    <table className="table">
+      <thead>
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <th>
             {reportType === 'daily'
               ? 'Date'
               : reportType === 'monthly'
               ? 'Month'
               : reportType === 'vehicle'
-              ? 'Vehicle Number'
-              : 'Supervisor Name'}
+              ? 'Vehicle number'
+              : 'Supervisor'}
           </th>
-          <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-36">
-            Total Dispatches
+          <th className="text-right w-36">
+            Dispatches
           </th>
-          <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-36">
-            Total Pallets
+          <th className="text-right w-36">
+            Pallets
           </th>
-          <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider w-40">
-            Total Parts Loaded
+          <th className="text-right w-40">
+            Parts loaded
           </th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-slate-100 bg-white">
+      <tbody>
         {reportData.map((row, idx) => (
-          <tr key={idx} className="hover:bg-slate-50/50 transition-colors duration-100">
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-bold uppercase font-mono">
+          <tr key={idx}>
+            <td className="whitespace-nowrap font-bold text-slate-800">
               {reportType === 'daily'
                 ? row.date
                 : reportType === 'monthly'
@@ -45,13 +45,13 @@ export const StandardReportTable: React.FC<StandardReportTableProps> = ({
                 ? row.vehicle_no
                 : row.supplier_name}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-700 text-right font-medium">
+            <td className="whitespace-nowrap text-right tabular-nums">
               {row.dispatch_count}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-700 text-right font-medium">
+            <td className="whitespace-nowrap text-right tabular-nums">
               {row.total_pallets}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-800 text-right font-bold">
+            <td className="whitespace-nowrap text-right font-bold text-slate-900 tabular-nums">
               {row.total_parts}
             </td>
           </tr>

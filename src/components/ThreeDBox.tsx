@@ -34,8 +34,8 @@ export const ThreeDBox: React.FC<ThreeDBoxProps> = ({ size = 125, rotationY = 0,
           className="absolute inset-0 border border-[#D35400]/40 bg-gradient-to-br from-[#F5B041] via-[#EB984E] to-[#DC7633] shadow-md rounded-sm flex items-center justify-center p-2"
           style={{ transform: `translateZ(${half}px)` }}
         >
-          <div className="p-3 bg-[#5B2C06]/15 rounded-xl border border-[#5B2C06]/20 shadow-inner flex items-center justify-center">
-            <LayoutDashboard size={48} className="text-[#421D03] stroke-[1.8]" />
+          <div className="p-3 bg-cocoa/15 rounded-xl border border-cocoa/20 shadow-inner flex items-center justify-center">
+            <LayoutDashboard size={48} className="text-cocoa-dark stroke-[1.8]" />
           </div>
         </div>
 
@@ -44,8 +44,8 @@ export const ThreeDBox: React.FC<ThreeDBoxProps> = ({ size = 125, rotationY = 0,
           className="absolute inset-0 border border-[#D35400]/40 bg-gradient-to-br from-[#E59866] via-[#DC7633] to-[#CA6F1E] shadow-md rounded-sm flex items-center justify-center p-2"
           style={{ transform: `rotateY(-90deg) translateZ(${half}px)` }}
         >
-          <div className="p-3 bg-[#5B2C06]/15 rounded-xl border border-[#5B2C06]/20 shadow-inner flex items-center justify-center">
-            <Truck size={48} className="text-[#421D03] stroke-[1.8]" />
+          <div className="p-3 bg-cocoa/15 rounded-xl border border-cocoa/20 shadow-inner flex items-center justify-center">
+            <Truck size={48} className="text-cocoa-dark stroke-[1.8]" />
           </div>
         </div>
 
@@ -54,8 +54,8 @@ export const ThreeDBox: React.FC<ThreeDBoxProps> = ({ size = 125, rotationY = 0,
           className="absolute inset-0 border border-[#BA4A00]/50 bg-gradient-to-br from-[#DC7633] via-[#CA6F1E] to-[#BA4A00] shadow-md rounded-sm flex items-center justify-center p-2"
           style={{ transform: `rotateY(180deg) translateZ(${half}px)` }}
         >
-          <div className="p-3 bg-[#5B2C06]/15 rounded-xl border border-[#5B2C06]/20 shadow-inner flex items-center justify-center">
-            <History size={48} className="text-[#421D03] stroke-[1.8]" />
+          <div className="p-3 bg-cocoa/15 rounded-xl border border-cocoa/20 shadow-inner flex items-center justify-center">
+            <History size={48} className="text-cocoa-dark stroke-[1.8]" />
           </div>
         </div>
 
@@ -64,22 +64,22 @@ export const ThreeDBox: React.FC<ThreeDBoxProps> = ({ size = 125, rotationY = 0,
           className="absolute inset-0 border border-[#D35400]/40 bg-gradient-to-br from-[#DC7633] via-[#CA6F1E] to-[#BA4A00] shadow-md rounded-sm flex items-center justify-center p-2"
           style={{ transform: `rotateY(90deg) translateZ(${half}px)` }}
         >
-          <div className="p-3 bg-[#5B2C06]/15 rounded-xl border border-[#5B2C06]/20 shadow-inner flex items-center justify-center">
-            <BarChart3 size={48} className="text-[#421D03] stroke-[1.8]" />
+          <div className="p-3 bg-cocoa/15 rounded-xl border border-cocoa/20 shadow-inner flex items-center justify-center">
+            <BarChart3 size={48} className="text-cocoa-dark stroke-[1.8]" />
           </div>
         </div>
 
         {/* TOP FACE -> SETTINGS ICON ON TOP OR CLIPBOARD */}
         <div
-          className="absolute inset-0 border border-[#F5B041] bg-gradient-to-br from-[#FAD7A0] via-[#F5B041] to-[#EB984E] shadow-sm rounded-sm overflow-visible flex items-center justify-center p-2"
+          className="absolute inset-0 border border-[#F5B041] bg-gradient-to-br from-[#FAD7A0] via-[#F5B041] to-[#EB984E] shadow-xs rounded-sm overflow-visible flex items-center justify-center p-2"
           style={{ transform: `rotateX(90deg) translateZ(${half}px)` }}
         >
           {/* Brown Packing Tape Strip Down The Center */}
           <div className="absolute inset-y-0 w-7 bg-[#D35400]/30 border-x border-[#BA4A00]/40 left-1/2 -translate-x-1/2 pointer-events-none" />
 
           {isSettings ? (
-            <div className="relative z-10 p-3 bg-[#5B2C06]/15 rounded-xl border border-[#5B2C06]/20 shadow-inner flex items-center justify-center">
-              <Settings size={48} className="text-[#421D03] stroke-[1.8]" />
+            <div className="relative z-10 p-3 bg-cocoa/15 rounded-xl border border-cocoa/20 shadow-inner flex items-center justify-center">
+              <Settings size={48} className="text-cocoa-dark stroke-[1.8]" />
             </div>
           ) : (
             /* Clipboard resting on top of box for other tabs */
@@ -103,7 +103,7 @@ export const ThreeDBox: React.FC<ThreeDBoxProps> = ({ size = 125, rotationY = 0,
 
         {/* BOTTOM FACE */}
         <div
-          className="absolute inset-0 border border-slate-800 bg-[#421D03] shadow-2xl rounded-sm"
+          className="absolute inset-0 border border-slate-800 bg-cocoa-dark shadow-2xl rounded-sm"
           style={{ transform: `rotateX(-90deg) translateZ(${half}px)` }}
         />
       </div>

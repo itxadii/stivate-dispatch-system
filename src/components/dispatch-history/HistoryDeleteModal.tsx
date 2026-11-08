@@ -17,31 +17,31 @@ export const HistoryDeleteModal: React.FC<HistoryDeleteModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Confirm Shipment Deletion"
+      title="Delete dispatch"
     >
       <div className="space-y-4 select-none">
-        <div className="flex items-start gap-3 bg-rose-50 p-4 rounded-xl border border-rose-100 text-rose-900 text-xs font-medium leading-relaxed">
+        <div className="alert alert-danger text-xs leading-relaxed">
           <AlertTriangle size={18} className="text-rose-500 shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold mb-1">Warning: Deletion is permanent</p>
+            <p className="text-sm font-bold text-rose-900 mb-1">This can't be undone</p>
             <p>
-              Are you sure you want to delete this dispatch? This will completely erase the Delivery Challan record and cascade delete all associated dispatch items from the database.
+              The delivery challan and all of its pull list items will be permanently removed.
             </p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="modal-footer">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer"
+            className="btn btn-secondary"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold cursor-pointer"
+            className="btn btn-danger"
           >
-            Confirm Delete
+            Delete dispatch
           </button>
         </div>
       </div>

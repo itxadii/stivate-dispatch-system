@@ -446,62 +446,59 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Export utilization PDF">
+      <div className="modal-backdrop" onClick={onClose} />
+      <div className="modal-panel max-w-3xl overflow-hidden my-auto max-h-[90vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+        <div className="modal-header">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 shadow-2xs">
+            <div className="w-9 h-9 rounded-lg bg-brand-50 grid place-items-center text-brand-700 shrink-0">
               <FileDown size={20} />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                <span>Export Vehicle Utilization PDF</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                  A4 Landscape
+              <h3 className="modal-title flex items-center gap-2">
+                <span>Export utilization report</span>
+                <span className="badge badge-neutral">
+                  A4 landscape PDF
                 </span>
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                Professional multi-page PDF with pallet capacity calculations, vehicle tables & dispatch audit
+              <p className="card-subtitle">
+                Pallet capacity, vehicle tables and the dispatch log
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-200/70 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            className="btn btn-ghost btn-sm btn-icon"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-5 space-y-5 overflow-y-auto flex-1">
           {/* Success Banner */}
           {exportSuccessPath && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+            <div className="alert alert-success flex-col gap-1.5" role="status">
               <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
                 <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
-                <span>PDF Report Generated & Downloaded Successfully!</span>
+                <span>PDF saved and opened</span>
               </div>
               <p className="text-xs text-slate-600 font-mono break-all pl-6">
                 Saved to: {exportSuccessPath}
               </p>
-              <div className="pl-6 pt-1 flex items-center gap-3">
-                <span className="text-[11px] text-emerald-700 font-semibold">
-                  File has been saved to your computer and opened in your PDF reader.
-                </span>
-              </div>
             </div>
           )}
 
           {/* Email Success Banner */}
           {emailSuccessMsg && (
-            <div className="p-4 bg-sky-50 border border-sky-200 rounded-xl space-y-1">
-              <div className="flex items-center gap-2 text-sky-900 font-bold text-sm">
-                <CheckCircle2 size={18} className="text-sky-600 shrink-0" />
-                <span>Report Emailed Successfully!</span>
+            <div className="alert alert-success flex-col gap-1" role="status">
+              <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+                <span>Report emailed</span>
               </div>
-              <p className="text-xs text-sky-800 pl-6">
+              <p className="text-xs text-emerald-800 pl-6">
                 {emailSuccessMsg}
               </p>
             </div>
@@ -509,7 +506,7 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
 
           {/* Error Banner */}
           {exportError && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2.5 text-rose-800 text-xs font-semibold">
+            <div className="alert alert-danger items-center text-xs font-bold" role="alert">
               <AlertCircle size={16} className="text-rose-600 shrink-0" />
               <span>{exportError}</span>
             </div>
@@ -518,35 +515,32 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
           {/* Form Filter Grid */}
           <div className="space-y-4">
             {/* 1. Date Range Filter */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <div>
+              <label className="field-label flex items-center gap-1.5">
                 <Calendar size={13} className="text-slate-400" />
-                <span>Date Range Filter</span>
+                <span>Date range</span>
               </label>
 
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
                 {(
                   [
-                    { id: 'all', label: 'All Time' },
-                    { id: '7days', label: 'Past 7 Days' },
-                    { id: '30days', label: 'Past 30 Days' },
-                    { id: '3months', label: 'Past 3 Months' },
-                    { id: '6months', label: 'Past 6 Months' },
-                    { id: '1year', label: 'Past Year' },
-                    { id: 'thisMonth', label: 'This Month' },
-                    { id: 'thisYear', label: 'This Year' },
-                    { id: 'custom', label: 'Custom Range' }
+                    { id: 'all', label: 'All time' },
+                    { id: '7days', label: 'Past 7 days' },
+                    { id: '30days', label: 'Past 30 days' },
+                    { id: '3months', label: 'Past 3 months' },
+                    { id: '6months', label: 'Past 6 months' },
+                    { id: '1year', label: 'Past year' },
+                    { id: 'thisMonth', label: 'This month' },
+                    { id: 'thisYear', label: 'This year' },
+                    { id: 'custom', label: 'Custom' }
                   ] as const
                 ).map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => setDateRange(opt.id)}
-                    className={`px-2.5 py-2 text-xs font-bold rounded-lg border transition-all cursor-pointer text-center ${
-                      dateRange === opt.id
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                    }`}
+                    aria-pressed={dateRange === opt.id}
+                    className={`btn btn-sm ${dateRange === opt.id ? 'btn-primary' : 'btn-secondary'}`}
                   >
                     {opt.label}
                   </button>
@@ -555,27 +549,27 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
 
               {/* Custom Date Pickers */}
               {dateRange === 'custom' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="panel p-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                      From Date
+                    <label className="field-label">
+                      From date
                     </label>
                     <input
                       type="date"
                       value={customFrom}
                       onChange={(e) => setCustomFrom(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                      className="input input-sm font-mono"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">
-                      To Date
+                    <label className="field-label">
+                      To date
                     </label>
                     <input
                       type="date"
                       value={customTo}
                       onChange={(e) => setCustomTo(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                      className="input input-sm font-mono"
                     />
                   </div>
                 </div>
@@ -585,17 +579,17 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
             {/* 2. DC Filter & Vehicle Filter */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* DC Filter */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <div>
+                <label className="field-label flex items-center gap-1.5">
                   <Filter size={13} className="text-slate-400" />
-                  <span>DC / Destination Scope</span>
+                  <span>Destination</span>
                 </label>
                 <select
                   value={dcFilter}
                   onChange={(e) => setDcFilter(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden cursor-pointer"
+                  className="input"
                 >
-                  <option value="all">All DCs (Complete Fleet)</option>
+                  <option value="all">All destinations</option>
                   {distinctDcs.map((dc) => (
                     <option key={dc} value={dc}>
                       {dc}
@@ -605,22 +599,22 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
               </div>
 
               {/* Vehicle Filter */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <div>
+                <label className="field-label flex items-center gap-1.5">
                   <Truck size={13} className="text-slate-400" />
-                  <span>Vehicle Scope</span>
+                  <span>Vehicles</span>
                 </label>
                 <div className="flex gap-2">
                   <select
                     value={vehicleFilterType}
                     onChange={(e) => setVehicleFilterType(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden cursor-pointer"
+                    className="input"
                   >
-                    <option value="all">All Vehicle Types</option>
-                    <option value="32ft">32 ft Vehicles only (16 Pallets/DC)</option>
-                    <option value="20ft">20 ft Vehicles only (8 Pallets/DC)</option>
-                    <option value="10ft">10 ft Vehicles only (2 Pallets/DC)</option>
-                    <option value="specific">Specific Vehicle Number...</option>
+                    <option value="all">All vehicles</option>
+                    <option value="32ft">32 ft only (16 pallets)</option>
+                    <option value="20ft">20 ft only (8 pallets)</option>
+                    <option value="10ft">10 ft only (2 pallets)</option>
+                    <option value="specific">One vehicle…</option>
                   </select>
                 </div>
                 {vehicleFilterType === 'specific' && (
@@ -628,9 +622,9 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
                     <select
                       value={specificVehicle}
                       onChange={(e) => setSpecificVehicle(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs font-mono font-bold bg-white border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                      className="input font-mono"
                     >
-                      <option value="">-- Choose Truck Plate --</option>
+                      <option value="">Choose vehicle</option>
                       {distinctVehicles.map((v) => (
                         <option key={v.vehicleNo} value={v.vehicleNo}>
                           {v.vehicleNo} ({v.vehicleSize})
@@ -643,59 +637,56 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
             </div>
 
             {/* 3. Report Type Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <div>
+              <label className="field-label flex items-center gap-1.5">
                 <Layers size={13} className="text-slate-400" />
-                <span>Report Sections to Include</span>
+                <span>Report contents</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <button
                   type="button"
                   onClick={() => setReportType('both')}
-                  className={`p-3 text-left rounded-xl border transition-all cursor-pointer space-y-1 ${
-                    reportType === 'both'
-                      ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/20 shadow-2xs'
-                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                  aria-pressed={reportType === 'both'}
+                  className={`p-3 text-left rounded-lg border transition-colors cursor-pointer space-y-1 ${
+                    reportType === 'both' ? 'bg-brand-50 border-brand ring-3 ring-brand/20' : 'bg-white border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-extrabold text-slate-800">Summary + Detailed</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800">
+                    <span className="text-sm font-bold text-slate-800">Summary and dispatches</span>
+                    <span className="badge badge-brand">
                       Recommended
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Fleet KPIs, Vehicle Type & DC tables, All Vehicles table, plus full dispatch audit log.
+                  <p className="text-2xs text-slate-500 font-normal">
+                    Fleet totals, breakdowns by truck size and destination, and every dispatch.
                   </p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setReportType('summary')}
-                  className={`p-3 text-left rounded-xl border transition-all cursor-pointer space-y-1 ${
-                    reportType === 'summary'
-                      ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/20 shadow-2xs'
-                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                  aria-pressed={reportType === 'summary'}
+                  className={`p-3 text-left rounded-lg border transition-colors cursor-pointer space-y-1 ${
+                    reportType === 'summary' ? 'bg-brand-50 border-brand ring-3 ring-brand/20' : 'bg-white border-slate-200 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-xs font-extrabold text-slate-800 block">Summary Report</span>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    KPI Summary tiles, Vehicle Type breakdown, DC breakdown, and All Vehicle Utilization table.
+                  <span className="text-sm font-bold text-slate-800 block">Summary only</span>
+                  <p className="text-2xs text-slate-500 font-normal">
+                    Fleet totals and breakdowns by truck size, destination and vehicle.
                   </p>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setReportType('detailed')}
-                  className={`p-3 text-left rounded-xl border transition-all cursor-pointer space-y-1 ${
-                    reportType === 'detailed'
-                      ? 'bg-blue-50/70 border-blue-500 ring-2 ring-blue-500/20 shadow-2xs'
-                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                  aria-pressed={reportType === 'detailed'}
+                  className={`p-3 text-left rounded-lg border transition-colors cursor-pointer space-y-1 ${
+                    reportType === 'detailed' ? 'bg-brand-50 border-brand ring-3 ring-brand/20' : 'bg-white border-slate-200 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-xs font-extrabold text-slate-800 block">Detailed Dispatches</span>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Summary metrics followed by complete row-by-row dispatch audit log with load ratios.
+                  <span className="text-sm font-bold text-slate-800 block">Dispatches only</span>
+                  <p className="text-2xs text-slate-500 font-normal">
+                    Headline totals followed by every dispatch with its load ratio.
                   </p>
                 </button>
               </div>
@@ -708,53 +699,53 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
                 type="checkbox"
                 checked={includeCompleteFleet}
                 onChange={(e) => setIncludeCompleteFleet(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                className="w-4 h-4 accent-brand-hover cursor-pointer shrink-0"
               />
               <label
                 htmlFor="includeCompleteFleet"
-                className="text-xs font-semibold text-slate-700 cursor-pointer select-none"
+                className="text-sm text-slate-700 cursor-pointer"
               >
-                Include complete registered fleet (display vehicles with 0 dispatches during the selected period)
+                Include vehicles with no dispatches in this period
               </label>
             </div>
           </div>
 
           {/* Live Preview Stats Box */}
-          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-600 uppercase tracking-wide">
-              <span>Report Preview Metrics</span>
-              <span className="text-blue-700 font-mono">{dateBoundaries.label}</span>
+          <div className="panel space-y-3">
+            <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-700">
+              <span>Preview</span>
+              <span className="text-slate-500 font-normal">{dateBoundaries.label}</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Vehicles</span>
-                <span className="text-base font-extrabold font-mono text-slate-800">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+                <span className="meta-label">Vehicles</span>
+                <span className="text-base font-black text-slate-900 tabular-nums">
                   {filteredData.summary.totalVehicles}
                 </span>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Dispatches</span>
-                <span className="text-base font-extrabold font-mono text-slate-800">
+              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+                <span className="meta-label">Dispatches</span>
+                <span className="text-base font-black text-slate-900 tabular-nums">
                   {filteredData.summary.totalDispatches}
                 </span>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Loaded Pallets</span>
-                <span className="text-base font-extrabold font-mono text-slate-800">
+              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+                <span className="meta-label">Pallets loaded</span>
+                <span className="text-base font-black text-slate-900 tabular-nums">
                   {filteredData.summary.totalLoadedPallets.toLocaleString()}
                 </span>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200/80 space-y-0.5">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Total Capacity</span>
-                <span className="text-base font-extrabold font-mono text-slate-800">
-                  {filteredData.summary.totalAvailableCapacity.toLocaleString()} P
+              <div className="p-2.5 bg-white rounded-lg border border-slate-200">
+                <span className="meta-label">Capacity</span>
+                <span className="text-base font-black text-slate-900 tabular-nums">
+                  {filteredData.summary.totalAvailableCapacity.toLocaleString()}
                 </span>
               </div>
-              <div className="p-2.5 bg-white rounded-lg border border-slate-200/80 space-y-0.5 col-span-2 sm:col-span-1">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Fleet Utilization</span>
+              <div className="p-2.5 bg-white rounded-lg border border-slate-200 col-span-2 sm:col-span-1">
+                <span className="meta-label">Utilization</span>
                 <span
-                  className={`text-base font-extrabold font-mono ${
+                  className={`text-base font-black tabular-nums ${
                     filteredData.summary.fleetUtilizationPct > 100
                       ? 'text-rose-600'
                       : filteredData.summary.fleetUtilizationPct >= 80
@@ -770,15 +761,12 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
         </div>
 
         {/* Action Footer */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 font-medium">
-            Formatted as formal A4 Landscape PDF with table pagination
-          </div>
+        <div className="px-5 py-4 border-t border-slate-100 flex flex-wrap items-center justify-end gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="btn btn-secondary"
             >
               Cancel
             </button>
@@ -786,18 +774,18 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
               type="button"
               onClick={handleEmailReport}
               disabled={isEmailing || isExporting}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 active:bg-sky-200 disabled:opacity-60 rounded-xl transition-all shadow-xs cursor-pointer"
+              className="btn btn-secondary"
               title="Email utilization report to configured recipients from noreply@stivate.com"
             >
               {isEmailing ? (
                 <>
-                  <Loader2 size={14} className="animate-spin text-sky-600" />
-                  <span>Sending Email...</span>
+                  <Loader2 size={14} className="animate-spin" />
+                  <span>Sending…</span>
                 </>
               ) : (
                 <>
-                  <Mail size={14} className="text-sky-600" />
-                  <span>Email Report to Recipients</span>
+                  <Mail size={14} />
+                  <span>Email to recipients</span>
                 </>
               )}
             </button>
@@ -805,17 +793,17 @@ export const VehicleUtilizationExportModal: React.FC<VehicleUtilizationExportMod
               type="button"
               onClick={handleExport}
               disabled={isExporting || isEmailing}
-              className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60 rounded-xl transition-all shadow-sm cursor-pointer"
+              className="btn btn-primary"
             >
               {isExporting ? (
                 <>
                   <Loader2 size={15} className="animate-spin" />
-                  <span>Generating PDF...</span>
+                  <span>Generating…</span>
                 </>
               ) : (
                 <>
                   <FileDown size={15} />
-                  <span>Generate & Download PDF</span>
+                  <span>Download PDF</span>
                 </>
               )}
             </button>
